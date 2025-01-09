@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using LMS.Shared.User;
+using Domain.Models.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -69,7 +69,6 @@ public static class SeedData
         {
             var result = await userManager.CreateAsync(user, passWord);
             if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
-
         }
     }
 }

@@ -17,6 +17,7 @@
 
 <button class="btn btn-primary" @onclick="CallAPIAsync">Call API</button>
 
+
 @if (demo == null)
 {
     <p>API not called yet</p>
@@ -39,6 +40,12 @@ else
         </tbody>
     </table>
 }
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <p>Hej auth user</p>
+    </Authorized>
+</AuthorizeView>
 
 
 @code {

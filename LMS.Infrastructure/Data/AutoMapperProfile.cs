@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
+using Domain.Models.Entities;
 using LMS.Shared.DTOs;
-using LMS.Shared.User;
-
 namespace LMS.Infrastructure.Data;
 
 public class AutoMapperProfile : Profile

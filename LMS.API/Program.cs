@@ -1,7 +1,8 @@
+using Domain.Models.Entities;
 using LMS.API.Extensions;
 using LMS.Infrastructure.Data;
 using LMS.Presemtation;
-using LMS.Shared.User;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;

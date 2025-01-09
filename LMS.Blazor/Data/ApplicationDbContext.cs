@@ -1,4 +1,4 @@
-using LMS.Shared.User;
+
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

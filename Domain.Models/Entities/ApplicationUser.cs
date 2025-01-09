@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace LMS.Shared.User;
+namespace Domain.Models.Entities;
 
-//ApplicationUser is shared between Blazor and API
+//Separate ApplicationUser between projects
+//Setup relationship with EF here!
 public class ApplicationUser : IdentityUser
 {
     public string? RefreshToken { get; set; }
