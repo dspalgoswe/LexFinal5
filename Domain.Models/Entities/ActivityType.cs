@@ -9,10 +9,9 @@ namespace Domain.Models.Entities
 {
     public class ActivityType
     {
-        public int ActivityTypeId { get; set; }
         [Required]
+        public int ActivityTypeId { get; set; }
         public string? Type { get; set; }
-
         public string? Deadlines { get; set; }
 
         // Navigation properties

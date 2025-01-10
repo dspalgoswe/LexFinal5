@@ -9,7 +9,7 @@ namespace Domain.Models.Entities
 {
     public class Activity
     {
-
+        [Required]
             public int ActivityId { get; set; }
 
             [Required]

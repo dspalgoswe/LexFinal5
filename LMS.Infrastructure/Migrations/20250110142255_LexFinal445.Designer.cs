@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infrastructure.Migrations
 {
     [DbContext(typeof(LmsContext))]
-    [Migration("20250109074716_Init")]
-    partial class Init
+    [Migration("20250110142255_LexFinal445")]
+    partial class LexFinal445
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,62 @@ namespace LMS.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Domain.Models.Entities.Activity", b =>
+                {
+                    b.Property<int>("ActivityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ActivityId"));
+
+                    b.Property<int?>("ActivityTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModuleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ActivityId");
+
+                    b.HasIndex("ActivityTypeId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("Activities");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
+                {
+                    b.Property<int>("ActivityTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ActivityTypeId"));
+
+                    b.Property<string>("Deadlines")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ActivityTypeId");
+
+                    b.ToTable("ActivityTypes");
+                });
 
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
                 {
@@ -36,6 +92,9 @@ namespace LMS.Infrastructure.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CoursesCourseId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -85,6 +144,8 @@ namespace LMS.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CoursesCourseId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -94,6 +155,109 @@ namespace LMS.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Course", b =>
+                {
+                    b.Property<int>("CourseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CourseId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CourseId");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Document", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TimeStamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("Documents");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Module", b =>
+                {
+                    b.Property<int>("ModuleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ModuleId"));
+
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ModuleId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Modules");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -229,6 +393,74 @@ namespace LMS.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Entities.Activity", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.ActivityType", "ActivityType")
+                        .WithMany("Activities")
+                        .HasForeignKey("ActivityTypeId");
+
+                    b.HasOne("Domain.Models.Entities.Module", "Module")
+                        .WithMany("Activities")
+                        .HasForeignKey("ModuleId");
+
+                    b.Navigation("ActivityType");
+
+                    b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Course", "Courses")
+                        .WithMany("Users")
+                        .HasForeignKey("CoursesCourseId");
+
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Document", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Activity", "Activity")
+                        .WithMany("Documents")
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.ApplicationUser", "User")
+                        .WithMany("Documents")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.Course", "Course")
+                        .WithMany("Documents")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.Module", "Module")
+                        .WithMany("Documents")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Module");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Module", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Course", "Course")
+                        .WithMany("Modules")
+                        .HasForeignKey("CourseId");
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -278,6 +510,37 @@ namespace LMS.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Activity", b =>
+                {
+                    b.Navigation("Documents");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.ActivityType", b =>
+                {
+                    b.Navigation("Activities");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
+                {
+                    b.Navigation("Documents");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Course", b =>
+                {
+                    b.Navigation("Documents");
+
+                    b.Navigation("Modules");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Module", b =>
+                {
+                    b.Navigation("Activities");
+
+                    b.Navigation("Documents");
                 });
 #pragma warning restore 612, 618
         }
