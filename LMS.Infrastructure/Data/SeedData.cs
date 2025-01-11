@@ -4,201 +4,253 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-
+using Microsoft.Extensions.Logging;
+using System.Transactions;
 namespace LMS.Infrastructure.Data;
 
 public static class SeedData
 {
-    private static UserManager<ApplicationUser> userManager = null!;
-    private static RoleManager<IdentityRole> roleManager = null!;
     private const string teacherRole = "Teacher";
     private const string studentRole = "Student";
 
     public static async Task SeedDataAsync(this IApplicationBuilder builder)
     {
-        using (var scope = builder.ApplicationServices.CreateScope())
+        using var scope = builder.ApplicationServices.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
+
+        // Get services including logger
+        var db = serviceProvider.GetRequiredService<LmsContext>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var logger = serviceProvider.GetRequiredService<ILogger<LmsContext>>();
+
+        try
         {
-            var serviceProvider = scope.ServiceProvider;
-            var db = serviceProvider.GetRequiredService<LmsContext>();
+            // Ensure database is created
+            await db.Database.EnsureCreatedAsync();
 
-            if (await db.Users.AnyAsync()) return;
+            logger.LogInformation("Checking if data exists...");
 
-            userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>() ??
-                throw new ArgumentNullException(nameof(userManager));
-            roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>() ??
-                throw new ArgumentNullException(nameof(roleManager));
-
-            try
+            // Check existing data - separate checks for each entity
+            if (await db.Users.AnyAsync())
+            {
+                logger.LogInformation("Users already exist in the database.");
+            }
+            else
             {
                 // Create roles
-                await CreateRolesAsync([teacherRole, studentRole]);
+                logger.LogInformation("Creating roles...");
+                await CreateRolesAsync(roleManager, new[] { teacherRole, studentRole });
 
                 // Generate teachers and students
-                await GenerateTeachersAsync(2);  // Generate 2 teachers
-                await GenerateStudentsAsync(10); // Generate 10 students
+                logger.LogInformation("Generating teachers...");
+                await GenerateTeachersAsync(userManager, 2);
 
-                // Generate courses with modules and activities
-                await GenerateCoursesAsync(db);
-
-                await db.SaveChangesAsync();
+                logger.LogInformation("Generating students...");
+                await GenerateStudentsAsync(userManager, 10);
             }
-            catch (Exception)
+
+            // Check and create activity types if they don't exist
+            if (!await db.ActivityTypes.AnyAsync())
             {
-                throw;
+                logger.LogInformation("Creating activity types...");
+                var activityTypes = new[]
+                {
+                new ActivityType { Type = "E-Learning", Deadlines = "Submit within 24h" },
+                new ActivityType { Type = "Lecture", Deadlines = "Attendance required" },
+                new ActivityType { Type = "Assignment", Deadlines = "Submit by end date" },
+                new ActivityType { Type = "Workshop", Deadlines = "Attendance required" },
+                new ActivityType { Type = "Exercise", Deadlines = "Complete by end date" }
+            };
+
+                await db.ActivityTypes.AddRangeAsync(activityTypes);
+                await db.SaveChangesAsync();
+                logger.LogInformation($"Added {activityTypes.Length} activity types");
             }
+
+            // Check and create courses if they don't exist
+            if (!await db.Courses.AnyAsync())
+            {
+                logger.LogInformation("Generating courses...");
+                var faker = new Faker();
+                var courseNames = new[]
+                {
+                "ASP.NET Core Web API Seminar",
+                ".NET Development 2024",
+                "JavaScript Development 2024",
+                "Frontend Development 2024"
+            };
+
+                // Get activity types for reference
+                var activityTypes = await db.ActivityTypes.ToListAsync();
+                if (!activityTypes.Any())
+                {
+                    throw new InvalidOperationException("Activity types must exist before creating courses");
+                }
+
+                foreach (var courseName in courseNames)
+                {
+                    var course = new Course
+                    {
+                        Name = courseName,
+                        Description = courseName.Contains("Seminar")
+                            ? "Online Course - 3 Inlämningsuppgifter"
+                            : faker.Lorem.Paragraph(),
+                        StartDate = DateTime.Now.AddDays(faker.Random.Int(1, 30)),
+                        Users = new List<ApplicationUser>(),
+                        Modules = new List<Module>()
+                    };
+
+                    var moduleStartDate = course.StartDate;
+                    var moduleCount = courseName.Contains("Seminar") ? 1 : 4;
+
+                    for (int i = 0; i < moduleCount; i++)
+                    {
+                        var module = new Module
+                        {
+                            Name = GetModuleName(courseName, i),
+                            Description = faker.Lorem.Paragraph(),
+                            StartDate = moduleStartDate,
+                            EndDate = moduleStartDate.AddDays(courseName.Contains("Seminar") ? 7 : 30),
+                            Activities = new List<Activity>(),
+                            Documents = new List<Document>()
+                        };
+
+                        var activityCount = courseName.Contains("Seminar") ? 3 : 5;
+                        for (int j = 0; j < activityCount; j++)
+                        {
+                            var activityType = activityTypes[j % activityTypes.Count];
+                            var activity = new Activity
+                            {
+                                Name = courseName.Contains("Seminar")
+                                    ? $"Assignment {j + 1}"
+                                    : GetActivityName(module.Name, j),
+                                Description = faker.Lorem.Paragraph(),
+                                StartDate = moduleStartDate.AddDays(j * (courseName.Contains("Seminar") ? 2 : 5)),
+                                EndDate = moduleStartDate.AddDays((j * (courseName.Contains("Seminar") ? 2 : 5)) + 4),
+                                ActivityType = activityType
+                            };
+
+                            module.Activities.Add(activity);
+                        }
+
+                        course.Modules.Add(module);
+                        moduleStartDate = module.EndDate.AddDays(1);
+                    }
+
+                    // Add students to course
+                    var students = await userManager.GetUsersInRoleAsync(studentRole);
+                    var studentGroup = students.Skip(courseNames.ToList().IndexOf(courseName) * 5).Take(5);
+                    foreach (var student in studentGroup)
+                    {
+                        course.Users.Add(student);
+                    }
+
+                    logger.LogInformation($"Adding course: {courseName} with {course.Modules.Count} modules");
+                    await db.Courses.AddAsync(course);
+                }
+
+                // Save all changes outside the loop
+                await db.SaveChangesAsync();
+                logger.LogInformation("Successfully saved all courses, modules, and activities");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while seeding the database");
+            throw;
         }
     }
 
-    private static async Task CreateRolesAsync(string[] roleNames)
+
+    private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager, string[] roleNames)
     {
         foreach (var roleName in roleNames)
         {
             if (await roleManager.RoleExistsAsync(roleName)) continue;
+
             var role = new IdentityRole { Name = roleName };
             var result = await roleManager.CreateAsync(role);
-            if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
+
+            if (!result.Succeeded)
+            {
+                throw new ApplicationException($"Failed to create role {roleName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
         }
     }
 
-    private static async Task GenerateTeachersAsync(int nrOfTeachers)
+    private static async Task GenerateTeachersAsync(UserManager<ApplicationUser> userManager, int nrOfTeachers)
     {
-        var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
-        {
-            e.Email = f.Internet.Email(provider: "lexicon.se"); // Teachers get lexicon.se emails
-            e.UserName = e.Email;
-        });
+        var faker = new Faker<ApplicationUser>("sv")
+            .Rules((f, e) =>
+            {
+                e.Email = f.Internet.Email(provider: "lexicon.se");
+                e.UserName = e.Email;
+            });
 
         var teachers = faker.Generate(nrOfTeachers);
-        var passWord = "BytMig123!";
-
-        if (string.IsNullOrEmpty(passWord))
-            throw new Exception("Password not found");
+        const string password = "BytMig123!";
 
         foreach (var teacher in teachers)
         {
-            var result = await userManager.CreateAsync(teacher, passWord);
-            if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
+            var result = await userManager.CreateAsync(teacher, password);
+            if (!result.Succeeded)
+            {
+                throw new ApplicationException($"Failed to create teacher: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
 
-            // Assign teacher role
-            await userManager.AddToRoleAsync(teacher, teacherRole);
+            var roleResult = await userManager.AddToRoleAsync(teacher, teacherRole);
+            if (!roleResult.Succeeded)
+            {
+                throw new ApplicationException($"Failed to assign teacher role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+            }
         }
     }
 
-    private static async Task GenerateStudentsAsync(int nrOfStudents)
+    private static async Task GenerateStudentsAsync(UserManager<ApplicationUser> userManager, int nrOfStudents)
     {
-        var faker = new Faker<ApplicationUser>("sv").Rules((f, e) =>
-        {
-            e.Email = f.Internet.Email();
-            e.UserName = e.Email;
-        });
+        var faker = new Faker<ApplicationUser>("sv")
+            .Rules((f, e) =>
+            {
+                e.Email = f.Internet.Email();
+                e.UserName = e.Email;
+            });
 
         var students = faker.Generate(nrOfStudents);
-        var passWord = "BytMig123!";
-
-        if (string.IsNullOrEmpty(passWord))
-            throw new Exception("Password not found");
+        const string password = "BytMig123!";
 
         foreach (var student in students)
         {
-            var result = await userManager.CreateAsync(student, passWord);
-            if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
-
-            // Assign student role
-            await userManager.AddToRoleAsync(student, studentRole);
-        }
-    }
-    // method to generate courses, modules and activities
-    private static async Task GenerateCoursesAsync(LmsContext db)
-    {
-        if (await db.Courses.AnyAsync()) return;
-
-        // First, get all students to assign to courses
-        var students = await userManager.GetUsersInRoleAsync(studentRole);
-        var studentGroups = students.Chunk(5).ToList(); // Split students into groups of 5
-
-        // Create activity types
-        var activityTypes = new[]
-        {
-        new ActivityType { Type = "E-Learning", Deadlines = "Submit within 24h" },
-        new ActivityType { Type = "Lecture", Deadlines = "Attendance required" },
-        new ActivityType { Type = "Assignment", Deadlines = "Submit by end date" },
-        new ActivityType { Type = "Workshop", Deadlines = "Attendance required" },
-        new ActivityType { Type = "Exercise", Deadlines = "Complete by end date" }
-    };
-        await db.ActivityTypes.AddRangeAsync(activityTypes);
-
-        // Create courses
-        var coursesFaker = new Faker<Course>()
-            .RuleFor(c => c.Name, f => f.PickRandomParam([".NET Development 2024", "JavaScript Development 2024"]))
-            .RuleFor(c => c.Description, f => f.Lorem.Paragraph())
-            .RuleFor(c => c.StartDate, f => f.Date.Future(0, DateTime.Now.AddDays(30)));
-
-        var courses = coursesFaker.Generate(2);
-
-        // For each course, create modules
-        foreach (var course in courses)
-        {
-            var moduleStartDate = course.StartDate;
-
-            // Create 4 modules per course
-            for (int i = 0; i < 4; i++)
+            var result = await userManager.CreateAsync(student, password);
+            if (!result.Succeeded)
             {
-                var module = new Module
-                {
-                    Name = GetModuleName(course.Name, i),
-                    Description = new Faker().Lorem.Paragraph(),
-                    StartDate = moduleStartDate,
-                    EndDate = moduleStartDate.AddDays(30),
-                    Course = course,
-                    Activities = new List<Activity>()
-                };
-
-                // Create 5 activities per module
-                for (int j = 0; j < 5; j++)
-                {
-                    var activityType = activityTypes[j % activityTypes.Length];
-                    var activity = new Activity
-                    {
-                        Name = GetActivityName(module.Name, j),
-                        Description = new Faker().Lorem.Paragraph(),
-                        StartDate = moduleStartDate.AddDays(j * 5),
-                        EndDate = moduleStartDate.AddDays((j * 5) + 4),
-                        Module = module,
-                        ActivityType = activityType
-                    };
-
-                    module.Activities.Add(activity);
-                }
-
-                course.Modules.Add(module);
-                moduleStartDate = module.EndDate.AddDays(1); // Next module starts after previous ends
+                throw new ApplicationException($"Failed to create student: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
 
-            // Assign students to the course
-            var courseStudents = studentGroups[courses.IndexOf(course)];
-            course.Users = courseStudents.ToList();
+            var roleResult = await userManager.AddToRoleAsync(student, studentRole);
+            if (!roleResult.Succeeded)
+            {
+                throw new ApplicationException($"Failed to assign student role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+            }
         }
-
-        await db.Courses.AddRangeAsync(courses);
-        await db.SaveChangesAsync();
     }
 
-    private static string GetModuleName(string courseName, int index)
-    {
-        if (courseName.Contains(".NET"))
-        {
-            return index switch
+    //private static async Task GenerateCoursesAsync(LmsContext db, UserManager<ApplicationUser> userManager)
+    //{
+        
+    //}
+
+    private static string GetModuleName(string courseName, int index) =>
+        courseName.Contains(".NET")
+            ? index switch
             {
                 0 => "C# Fundamentals",
                 1 => "Database Development",
                 2 => "Backend Development",
                 3 => "Frontend Development",
                 _ => $"Module {index + 1}"
-            };
-        }
-        else // JavaScript course
-        {
-            return index switch
+            }
+            : index switch
             {
                 0 => "JavaScript Basics",
                 1 => "Advanced JavaScript",
@@ -206,12 +258,9 @@ public static class SeedData
                 3 => "Full Stack JavaScript",
                 _ => $"Module {index + 1}"
             };
-        }
-    }
 
-    private static string GetActivityName(string moduleName, int index)
-    {
-        return index switch
+    private static string GetActivityName(string moduleName, int index) =>
+        index switch
         {
             0 => $"{moduleName} - Introduction Lecture",
             1 => $"{moduleName} - E-Learning Session",
@@ -220,5 +269,4 @@ public static class SeedData
             4 => $"{moduleName} - Final Assignment",
             _ => $"Activity {index + 1}"
         };
-    }
 }

@@ -54,6 +54,13 @@ public class Program
                 policy.RequireRole("Teacher")); // Teachers have admin rights
         });
 
+        //logging for clearer and easier debugging
+        builder.Services.AddLogging(options =>
+        {
+            options.AddConsole();
+            options.AddDebug();
+        });
+
         builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 10000);
 
         var app = builder.Build();

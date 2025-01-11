@@ -33,6 +33,9 @@ namespace LMS.Infrastructure.Migrations
                     b.Property<int?>("ActivityTypeId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ActivityTypeId1")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -54,6 +57,8 @@ namespace LMS.Infrastructure.Migrations
 
                     b.HasIndex("ActivityTypeId");
 
+                    b.HasIndex("ActivityTypeId1");
+
                     b.HasIndex("ModuleId");
 
                     b.ToTable("Activities");
@@ -71,6 +76,7 @@ namespace LMS.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ActivityTypeId");
@@ -245,6 +251,7 @@ namespace LMS.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
@@ -393,12 +400,18 @@ namespace LMS.Infrastructure.Migrations
             modelBuilder.Entity("Domain.Models.Entities.Activity", b =>
                 {
                     b.HasOne("Domain.Models.Entities.ActivityType", "ActivityType")
+                        .WithMany()
+                        .HasForeignKey("ActivityTypeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Domain.Models.Entities.ActivityType", null)
                         .WithMany("Activities")
-                        .HasForeignKey("ActivityTypeId");
+                        .HasForeignKey("ActivityTypeId1");
 
                     b.HasOne("Domain.Models.Entities.Module", "Module")
                         .WithMany("Activities")
-                        .HasForeignKey("ModuleId");
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("ActivityType");
 
@@ -453,7 +466,8 @@ namespace LMS.Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Models.Entities.Course", "Course")
                         .WithMany("Modules")
-                        .HasForeignKey("CourseId");
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Course");
                 });
