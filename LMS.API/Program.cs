@@ -43,6 +43,24 @@ public class Program
                 .AddEntityFrameworkStores<LmsContext>()
                 .AddDefaultTokenProviders();
 
+        builder.Services.AddAuthorization(options =>
+        {
+            // Teacher policies
+            options.AddPolicy("TeacherPolicy", policy =>
+                policy.RequireRole("Teacher"));
+
+            // Create a combined policy for administrative actions
+            options.AddPolicy("AdminPolicy", policy =>
+                policy.RequireRole("Teacher")); // Teachers have admin rights
+        });
+
+        //logging for clearer and easier debugging
+        builder.Services.AddLogging(options =>
+        {
+            options.AddConsole();
+            options.AddDebug();
+        });
+
         builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 10000);
 
         var app = builder.Build();
