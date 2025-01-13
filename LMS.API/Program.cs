@@ -35,6 +35,7 @@ public class Program
         builder.Services.ConfigureJwt(builder.Configuration);
         builder.Services.ConfigureCors();
 
+        builder.Services.AddHttpClient();
         builder.Services.AddScoped<ITeacherService, TeacherService>();
         builder.Services.AddScoped<ICourseService, CourseService>();
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,15 +16,29 @@ namespace Domain.Models.Entities
             Documents = new List<Document>();
         }
 
+        [Key]
         public int ModuleId { get; set; }
-        public string? Name { get; set; }
-        public string? Description { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public Course? Course { get; set; }
 
-        // Changed from Icollectoin to List<T>
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string Description { get; set; }
+
+        [Required]
+        public DateTime StartDate { get; set; }
+
+        [Required]
+        public DateTime EndDate { get; set; }
+
+        [Required]
+        public int CourseId { get; set; }
+
+        [ForeignKey("CourseId")]
+        public Course Course { get; set; }
+
         public List<Activity> Activities { get; set; }
+
         public List<Document> Documents { get; set; }
     }
 

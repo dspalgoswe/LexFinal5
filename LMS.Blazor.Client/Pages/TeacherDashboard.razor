@@ -1,0 +1,92 @@
+﻿@page "/teacher-dashboard"
+@using LMS.Services
+@using LMS.Shared.DTOs
+
+@* @inject ITeacherService TeacherService *@
+@inject NavigationManager NavigationManager
+
+<h1>Teacher Dashboard</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Courses</h2>
+        @if (courses == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var course in courses)
+                {
+                    <li class="list-group-item">
+                        <span @onclick="() => SelectCourse(course.CourseId)">@course.Name</span>
+                    </li>
+                }
+            </ul>
+        }
+        <button class="btn btn-primary mt-2" @onclick="CreateNewCourse">Create New Course</button>
+    </div>
+    <div class="col-md-4">
+        <h2>Modules</h2>
+        @if (selectedCourse != null)
+        {
+            @if (modules == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <ul class="list-group">
+                    @foreach (var module in modules)
+                    {
+                        <li class="list-group-item">
+                            <span @onclick="() => SelectModule(module.ModuleId)">@module.Name</span>
+                        </li>
+                    }
+                </ul>
+            }
+            <button class="btn btn-primary mt-2" @onclick="CreateNewModule">Create New Module</button>
+        }
+        else
+        {
+            <p>Select a course to view its modules</p>
+        }
+    </div>
+    <div class="col-md-4">
+        <h2>Activities</h2>
+        @if (selectedModule != null)
+        {
+            @if (activities == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <ul class="list-group">
+                    @foreach (var activity in activities)
+                    {
+                        <li class="list-group-item">@activity.Name</li>
+                    }
+                </ul>
+            }
+            <button class="btn btn-primary mt-2" @onclick="CreateNewActivity">Create New Activity</button>
+        }
+        else
+        {
+            <p>Select a module to view its activities</p>
+        }
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h2>User Management</h2>
+        <button class="btn btn-primary" @onclick="CreateNewUser">Create New User</button>
+        <button class="btn btn-secondary" @onclick="ViewAllUsers">View All Users</button>
+    </div>
+</div>
+
+@code {
+
+}

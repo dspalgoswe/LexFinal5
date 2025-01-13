@@ -18,18 +18,22 @@ namespace Domain.Models.Entities
             Documents = new List<Document>();
         }
 
-        [Required]
+        [Key]
         public int CourseId { get; set; }
+
         [Required]
-        public string? Name { get; set; }
+        public string Name { get; set; }
+
         [Required]
-        public string? Description { get; set; }
+        public string Description { get; set; }
+
         [Required]
         public DateTime StartDate { get; set; }
 
-        // Navigation properties - changed to List<T>
         public List<ApplicationUser> Users { get; set; }
+
         public List<Module> Modules { get; set; }
+
         public List<Document> Documents { get; set; }
     }
 }

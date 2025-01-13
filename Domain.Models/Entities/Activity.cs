@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,14 +10,14 @@ namespace Domain.Models.Entities
 {
     public class Activity
     {
-        [Required]
+        [Key]
         public int ActivityId { get; set; }
 
         [Required]
-        public string? Name { get; set; }
+        public string Name { get; set; }
 
         [Required]
-        public string? Description { get; set; }
+        public string Description { get; set; }
 
         [Required]
         public DateTime StartDate { get; set; }
@@ -24,9 +25,18 @@ namespace Domain.Models.Entities
         [Required]
         public DateTime EndDate { get; set; }
 
-        // Navigation properties
-        public Module? Module { get; set; }
-        public ActivityType? ActivityType { get; set; }
-        public ICollection<Document>? Documents { get; set; }
+        [Required]
+        public int ModuleId { get; set; }
+
+        [ForeignKey("ModuleId")]
+        public Module Module { get; set; }
+
+        [Required]
+        public int ActivityTypeId { get; set; }
+
+        [ForeignKey("ActivityTypeId")]
+        public ActivityType ActivityType { get; set; }
+
+        public List<Document> Documents { get; set; }
     }
 }
