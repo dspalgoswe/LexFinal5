@@ -2,9 +2,10 @@ using Domain.Models.Entities;
 using LMS.API.Extensions;
 using LMS.Infrastructure.Data;
 using LMS.Presemtation;
-
+using LMS.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Services.Contracts;
 using System.Security.Claims;
 
 
@@ -34,6 +35,9 @@ public class Program
         builder.Services.ConfigureJwt(builder.Configuration);
         builder.Services.ConfigureCors();
 
+        builder.Services.AddScoped<ITeacherService, TeacherService>();
+        builder.Services.AddScoped<ICourseService, CourseService>();
+
         builder.Services.AddIdentityCore<ApplicationUser>(opt =>
             {
                 opt.SignIn.RequireConfirmedAccount = false;
@@ -52,6 +56,9 @@ public class Program
             // Create a combined policy for administrative actions
             options.AddPolicy("AdminPolicy", policy =>
                 policy.RequireRole("Teacher")); // Teachers have admin rights
+
+              options.AddPolicy("StudentDocumentAccess", policy =>
+                    policy.RequireRole("Student", "Teacher"));
         });
 
         //logging for clearer and easier debugging
