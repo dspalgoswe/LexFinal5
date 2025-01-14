@@ -1,0 +1,104 @@
+﻿@page "/student-course"
+@inject HttpClient Http
+
+
+    @if (isLoading)
+    {
+        <p> Loading...</p>
+    }
+
+    else if (course == null)
+    {
+    <p>No course found for the student. </p>
+}
+
+    else
+    {
+      <h3>Course: @course.Name</h3>
+      <p>@course.Description</p>
+    }
+
+
+    <h4>Participants:</h4>
+      <ul>
+           @if(participants != null && participants.Any())
+            {
+               @foreach (var p in participants)
+                {
+                <li> @p.UserName (@p.Email)</li>
+                }
+
+            }
+
+            else
+            {
+                <li>No participants found.</li>
+            }
+      </ul>
+
+
+@code {
+
+    private string studentId = "student-id"; //ska ersätas med student-Id
+    private Course? course;
+    private List<Participant>? participants;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStudentCourse();
+    }
+
+
+
+    private async Task LoadStudentCourse()
+    {
+        isLoading = true;
+
+        try
+        {
+            //Hämtar kursen
+            course = await Http.GetFromJsonAsync<Course>($"api/student/{studentId}/course");
+
+            //Hämtar deltagarna
+            if(course != null)
+            {
+                participants = await Http.GetFromJsonAsync<List<Participant>>($"api/course/{course.Id}/participants");
+            }
+        }
+
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+      //Klassen för att representera kursens data
+        public class Course
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public List<Module> Modules { get; set; } = new();
+
+        }
+
+        public class Module
+        {
+            public string Name { get; set; }
+            public DateTime StartDate { get; set; }
+            public DateTime EndDate { get; set; }
+        }
+
+        public class Participant
+        {
+            public string Id { get; set; }
+            public string UserName { get; set; }
+            public string Email { get; set; }
+        
+        }
+
+
+
+
+}
