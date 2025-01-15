@@ -9,9 +9,7 @@ namespace LMS.Blazor.Client.Pages
 
     partial class TeacherDashboard
     {
-        [Inject]
-        public ITeacherService TeacherService { get; set; }
-
+      
         private IEnumerable<CourseDto> courses;
         private IEnumerable<ModuleDto> modules;
         private IEnumerable<ActivityDto> activities;
@@ -20,13 +18,13 @@ namespace LMS.Blazor.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            courses = (IEnumerable<CourseDto>)await TeacherService.GetAllCoursesAsync();
+            courses = await TeacherService.GetAllCoursesAsync();
         }
 
         private async Task SelectCourse(int courseId)
         {
             selectedCourse = courses.FirstOrDefault(c => c.CourseId == courseId);
-            modules = (IEnumerable<ModuleDto>)await TeacherService.GetModulesByCourseIdAsync(courseId);
+            modules = await TeacherService.GetModulesByCourseIdAsync(courseId);
             selectedModule = null;
             activities = null;
         }
@@ -34,7 +32,7 @@ namespace LMS.Blazor.Client.Pages
         private async Task SelectModule(int moduleId)
         {
             selectedModule = modules.FirstOrDefault(m => m.ModuleId == moduleId);
-            activities = (IEnumerable<ActivityDto>)await TeacherService.GetActivitiesByModuleIdAsync(moduleId);
+            activities = await TeacherService.GetActivitiesByModuleIdAsync(moduleId);
         }
 
         private void CreateNewCourse()

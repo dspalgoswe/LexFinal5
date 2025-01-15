@@ -11,7 +11,7 @@ namespace Domain.Models.Entities
 {
     public class Course
     {
-        public Course()
+        public Course() 
         {
             Modules = new List<Module>();
             Users = new List<ApplicationUser>();

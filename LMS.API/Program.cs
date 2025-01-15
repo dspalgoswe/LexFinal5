@@ -1,6 +1,8 @@
+using Domain.Contracts;
 using Domain.Models.Entities;
 using LMS.API.Extensions;
 using LMS.Infrastructure.Data;
+using LMS.Infrastructure.Repositories;
 using LMS.Presemtation;
 using LMS.Services;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +39,8 @@ public class Program
 
         builder.Services.AddHttpClient();
         builder.Services.AddScoped<ITeacherService, TeacherService>();
+        builder.Services.AddLazy<ITeacherService>();
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<ICourseService, CourseService>();
 
         builder.Services.AddIdentityCore<ApplicationUser>(opt =>
@@ -51,15 +55,12 @@ public class Program
         builder.Services.AddAuthorization(options =>
         {
             // Teacher policies
-            options.AddPolicy("TeacherPolicy", policy =>
-                policy.RequireRole("Teacher"));
+            options.AddPolicy("TeacherPolicy", policy => policy.RequireRole("Teacher"));
 
             // Create a combined policy for administrative actions
-            options.AddPolicy("AdminPolicy", policy =>
-                policy.RequireRole("Teacher")); // Teachers have admin rights
+            options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Teacher")); // Teachers have admin rights
 
-              options.AddPolicy("StudentDocumentAccess", policy =>
-                    policy.RequireRole("Student", "Teacher"));
+              options.AddPolicy("StudentDocumentAccess", policy => policy.RequireRole("Student", "Teacher"));
         });
 
         //logging for clearer and easier debugging

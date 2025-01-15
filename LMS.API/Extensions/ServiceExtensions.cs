@@ -27,6 +27,7 @@ public static class ServiceExtensions
 
     public static void ConfigureServiceLayerServices(this IServiceCollection services)
     {
+        services.AddScoped<ITeacherService, TeacherService>();
         services.AddScoped<IServiceManager, ServiceManager>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddLazy<IAuthService>();

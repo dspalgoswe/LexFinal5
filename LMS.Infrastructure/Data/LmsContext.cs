@@ -17,6 +17,14 @@ public class LmsContext : IdentityDbContext<ApplicationUser, IdentityRole, strin
     public DbSet<ActivityType> ActivityTypes { get; set; }
     public DbSet<Document> Documents { get; set; }
 
-   
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
 
+
+        builder.Entity<ApplicationUser>()
+            .HasOne(u => u.Course)
+            .WithMany(c => c.Users)
+            .HasForeignKey(u => u.CourseId);
+    }
 }

@@ -1,7 +1,7 @@
 ﻿@page "/create-user"
 @using LMS.Services
 @using LMS.Shared.DTOs
-@inject ITeacherService TeacherService
+@* @inject ITeacherService TeacherService *@
 @inject NavigationManager NavigationManager
 
 <h1>Create New User</h1>
@@ -40,19 +40,19 @@
 
     private async Task HandleValidSubmit()
     {
-        var result = await TeacherService.CreateUserAsync(userDto);
-        if (result.Succeeded)
-        {
-            NavigationManager.NavigateTo("/teacher-dashboard");
-        }
-        else
-        {
-            // Handle errors, perhaps display them to the user
-            foreach (var error in result.Errors)
-            {
-                Console.WriteLine($"Error: {error.Description}");
-            }
-        }
+        // var result = await TeacherService.CreateUserAsync(userDto);
+        // if (result.Succeeded)
+        // {
+        //     NavigationManager.NavigateTo("/teacher-dashboard");
+        // }
+        // else
+        // {
+        //     // Handle errors, perhaps display them to the user
+        //     foreach (var error in result.Errors)
+        //     {
+        //         Console.WriteLine($"Error: {error.Description}");
+        //     }
+        // }
     }
 }
 

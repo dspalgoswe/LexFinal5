@@ -12,11 +12,12 @@ public class ServiceManager : IServiceManager
 {
 
     private readonly Lazy<IAuthService> authService;
-
+    private readonly Lazy<ITeacherService> teacherService;
     public IAuthService AuthService => authService.Value;
-
-    public ServiceManager(Lazy<IAuthService> authService)
+    public ITeacherService TeacherService => teacherService.Value;
+    public ServiceManager(Lazy<IAuthService> authService, Lazy<ITeacherService> teacherService)
     {
         this.authService = authService;
+        this.teacherService = teacherService;
     }
 }

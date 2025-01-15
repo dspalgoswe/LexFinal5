@@ -18,18 +18,17 @@ namespace LMS.Services
         private readonly IMapper _mapper;
         private readonly LmsContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<TeacherService> _logger;
+        //private readonly ILogger<TeacherService> _logger;
 
         public CourseService(
             IMapper mapper,
             LmsContext context,
-            UserManager<ApplicationUser> userManager,
-            ILogger<TeacherService> logger)
+            UserManager<ApplicationUser> userManager)
+            //ILogger<TeacherService> logger)
         {
             _mapper = mapper;
             _context = context;
             _userManager = userManager;
-            _logger = logger;
         }
 
         public async Task<IEnumerable<Course>> GetAllCoursesAsync()
@@ -46,7 +45,7 @@ namespace LMS.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while getting all courses");
+                //_logger.LogError(ex, "Error occurred while getting all courses");
                 throw;
             }
         }
@@ -65,7 +64,7 @@ namespace LMS.Services
 
                 if (course == null)
                 {
-                    _logger.LogWarning("Course with ID {CourseId} was not found", id);
+                    //_logger.LogWarning("Course with ID {CourseId} was not found", id);
                     throw new KeyNotFoundException($"Course with ID {id} not found");
                 }
 
@@ -73,7 +72,7 @@ namespace LMS.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while getting course with ID {CourseId}", id);
+                //_logger.LogError(ex, "Error occurred while getting course with ID {CourseId}", id);
                 throw;
             }
         }
@@ -85,12 +84,12 @@ namespace LMS.Services
                 await _context.Courses.AddAsync(course);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Created new course with ID {CourseId}", course.CourseId);
+                //_logger.LogInformation("Created new course with ID {CourseId}", course.CourseId);
                 return course;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating new course");
+                //_logger.LogError(ex, "Error occurred while creating new course");
                 throw;
             }
         }
@@ -105,7 +104,7 @@ namespace LMS.Services
 
                 if (existingCourse == null)
                 {
-                    _logger.LogWarning("Course with ID {CourseId} was not found for update", id);
+                    //_logger.LogWarning("Course with ID {CourseId} was not found for update", id);
                     throw new KeyNotFoundException($"Course with ID {id} not found");
                 }
 
@@ -115,13 +114,13 @@ namespace LMS.Services
                 existingCourse.StartDate = updatedCourse.StartDate;
 
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Updated course with ID {CourseId}", id);
+                //_logger.LogInformation("Updated course with ID {CourseId}", id);
 
                 return existingCourse;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while updating course with ID {CourseId}", id);
+                //_logger.LogError(ex, "Error occurred while updating course with ID {CourseId}", id);
                 throw;
             }
         }
@@ -133,19 +132,19 @@ namespace LMS.Services
                 var course = await _context.Courses.FindAsync(id);
                 if (course == null)
                 {
-                    _logger.LogWarning("Course with ID {CourseId} was not found for deletion", id);
+                    //_logger.LogWarning("Course with ID {CourseId} was not found for deletion", id);
                     return false;
                 }
 
                 _context.Courses.Remove(course);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Deleted course with ID {CourseId}", id);
+                //_logger.LogInformation("Deleted course with ID {CourseId}", id);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while deleting course with ID {CourseId}", id);
+                //_logger.LogError(ex, "Error occurred while deleting course with ID {CourseId}", id);
                 throw;
             }
         }
@@ -160,14 +159,14 @@ namespace LMS.Services
 
                 if (course == null)
                 {
-                    _logger.LogWarning("Course with ID {CourseId} was not found when adding user", courseId);
+                    //_logger.LogWarning("Course with ID {CourseId} was not found when adding user", courseId);
                     return false;
                 }
 
                 var user = await _context.Users.FindAsync(userId);
                 if (user == null)
                 {
-                    _logger.LogWarning("User with ID {UserId} was not found when adding to course", userId);
+                    //_logger.LogWarning("User with ID {UserId} was not found when adding to course", userId);
                     return false;
                 }
 
@@ -180,14 +179,14 @@ namespace LMS.Services
                 {
                     course.Users.Add(user);
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation("Added user {UserId} to course {CourseId}", userId, courseId);
+                    //_logger.LogInformation("Added user {UserId} to course {CourseId}", userId, courseId);
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while adding user {UserId} to course {CourseId}", userId, courseId);
+                //_logger.LogError(ex, "Error occurred while adding user {UserId} to course {CourseId}", userId, courseId);
                 throw;
             }
         }
@@ -214,12 +213,12 @@ namespace LMS.Services
                 course.Users.Remove(user);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Removed user {UserId} from course {CourseId}", userId, courseId);
+                //_logger.LogInformation("Removed user {UserId} from course {CourseId}", userId, courseId);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while removing user {UserId} from course {CourseId}", userId, courseId);
+                //_logger.LogError(ex, "Error occurred while removing user {UserId} from course {CourseId}", userId, courseId);
                 throw;
             }
         }
@@ -236,7 +235,7 @@ namespace LMS.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while getting courses for user {UserId}", userId);
+                //_logger.LogError(ex, "Error occurred while getting courses for user {UserId}", userId);
                 throw;
             }
         }
@@ -254,7 +253,7 @@ namespace LMS.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while getting modules for course {CourseId}", courseId);
+                //_logger.LogError(ex, "Error occurred while getting modules for course {CourseId}", courseId);
                 throw;
             }
         }

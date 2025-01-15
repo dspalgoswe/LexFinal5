@@ -7,3 +7,11 @@ public interface IApiService
 {
     Task<IEnumerable<DemoDto>> CallApiAsync();
 }
+
+public class MockApiService : IApiService
+{
+    public Task<IEnumerable<DemoDto>> CallApiAsync()
+    {
+        throw new NotImplementedException();
+    }
+}
