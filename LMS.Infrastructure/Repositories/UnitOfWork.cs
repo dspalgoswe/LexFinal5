@@ -5,15 +5,26 @@ namespace LMS.Infrastructure.Repositories;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly LmsContext context;
+    private readonly LmsContext _context;
+    private ICourseRepository _courseRepository;
+    private IModuleRepository _moduleRepository;
+    private IActivityRepository _activityRepository;
+      
+
+ 
 
     public UnitOfWork(LmsContext context)
     {
-        this.context = context;
-    }
+        _context = context;    }
 
-    public async Task CompleteASync()
+    public ICourseRepository Course => throw new NotImplementedException();
+
+    public IModuleRepository Module => throw new NotImplementedException();
+
+    public IActivityRepository Activity => throw new NotImplementedException();
+
+    public Task CompleteASync()
     {
-        await context.SaveChangesAsync();
+        throw new NotImplementedException();
     }
 }

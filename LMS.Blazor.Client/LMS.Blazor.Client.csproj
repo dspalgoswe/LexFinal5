@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LMS.Services\LMS.Services.csproj" />
     <ProjectReference Include="..\LMS.Shared\LMS.Shared.csproj" />
+    <ProjectReference Include="..\Services.Contracts\Services.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

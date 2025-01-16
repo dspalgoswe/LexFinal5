@@ -11,18 +11,18 @@ namespace Services.Contracts
 {
     public interface ITeacherService
     {
-        Task<IEnumerable<Course>> GetAllCoursesAsync();
-        Task<IEnumerable<Module>> GetModulesByCourseIdAsync(int courseId);
-        Task<IEnumerable<Activity>> GetActivitiesByModuleIdAsync(int moduleId);
+        Task<IEnumerable<CourseDto>> GetAllCoursesAsync();
+        Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(int courseId);
+        Task<IEnumerable<ActivityDto>> GetActivitiesByModuleIdAsync(int moduleId);
         Task<IdentityResult> CreateUserAsync(CreateUserDto userDto);
         Task<IdentityResult> UpdateUserAsync(string userId, UpdateUserDto userDto);
-        Task<Course> CreateCourseAsync(CreateCourseDto courseDto);
+        Task<CourseDto> CreateCourseAsync(CreateCourseDto courseDto);
         Task<bool> UpdateCourseAsync(int courseId, UpdateCourseDto courseDto);
         Task<bool> DeleteCourseAsync(int courseId);
-        Task<Module> CreateModuleAsync(CreateModuleDto moduleDto);
+        Task<ModuleDto> CreateModuleAsync(CreateModuleDto moduleDto);
         Task<bool> UpdateModuleAsync(int moduleId, UpdateModuleDto moduleDto);
         Task<bool> DeleteModuleAsync(int moduleId);
-        Task<Activity> CreateActivityAsync(CreateActivityDto activityDto);
+        Task<ActivityDto> CreateActivityAsync(CreateActivityDto activityDto);
         Task<bool> UpdateActivityAsync(int activityId, UpdateActivityDto activityDto);
         Task<bool> DeleteActivityAsync(int activityId);
     }
