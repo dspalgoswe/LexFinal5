@@ -38,10 +38,11 @@ public class Program
         builder.Services.ConfigureCors();
 
         builder.Services.AddHttpClient();
-        //builder.Services.AddScoped<ITeacherService, TeacherService>();
-        //builder.Services.AddLazy<ITeacherService>();
+        builder.Services.AddScoped<IServiceManager, ServiceManager>();
+        builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
+        builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+        builder.Services.AddScoped<ICourseRepository, CourseRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-        //builder.Services.AddScoped<ICourseService, CourseService>();
 
         builder.Services.AddIdentityCore<ApplicationUser>(opt =>
             {
