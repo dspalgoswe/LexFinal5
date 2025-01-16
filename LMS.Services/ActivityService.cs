@@ -7,56 +7,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Services.Contracts;
+using Domain.Contracts;
 
 namespace LMS.Services
 {
     public class ActivityService : IActivityService
     {
-        private readonly LmsContext _context;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _uow;
 
-        public ActivityService(LmsContext context, IMapper mapper)
+        public ActivityService(IUnitOfWork uow, IMapper mapper)
         {
-            _context = context;
+            _uow = uow;
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ActivityDto>> GetActivitiesByModuleIdAsync(int moduleId)
+        public async Task<ActivityDto> GetActivityAsync(int activityId)
         {
-            var activities = await _context.Activities
-                .Where(a => a.ModuleId == moduleId)
-                .ToListAsync();
-            return _mapper.Map<IEnumerable<ActivityDto>>(activities);
-        }
-
-        public async Task<ActivityDto> CreateActivityAsync(ActivityDto activityDto)
-        {
-            var activity = _mapper.Map<Activity>(activityDto);
-            await _context.Activities.AddAsync(activity);
-            await _context.SaveChangesAsync();
+            Activity? activity = await _uow.Activity.GetActivityByIdAsync(activityId);
             return _mapper.Map<ActivityDto>(activity);
         }
-
-        public async Task<bool> UpdateActivityAsync(int activityId, ActivityDto activityDto)
+        public Task<ActivityDto> CreateActivityAsync(ActivityDto activityDto)
         {
-            var existingActivity = await _context.Activities.FindAsync(activityId);
-            if (existingActivity == null)
-                return false;
-
-            _mapper.Map(activityDto, existingActivity);
-            await _context.SaveChangesAsync();
-            return true;
+            throw new NotImplementedException();
         }
 
-        public async Task<bool> DeleteActivityAsync(int activityId)
+        public Task<bool> DeleteActivityAsync(int activityId)
         {
-            var activity = await _context.Activities.FindAsync(activityId);
-            if (activity == null)
-                return false;
+            throw new NotImplementedException();
+        }
 
-            _context.Activities.Remove(activity);
-            await _context.SaveChangesAsync();
-            return true;
+        public Task<IEnumerable<ActivityDto>> GetActivitiesByModuleIdAsync(int moduleId)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public Task<bool> UpdateActivityAsync(int activityId, ActivityDto activityDto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

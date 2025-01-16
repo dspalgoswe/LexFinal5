@@ -16,7 +16,6 @@ namespace Domain.Models.Entities
             Documents = new List<Document>();
         }
 
-        [Key]
         public int ModuleId { get; set; }
 
         [Required]
@@ -34,7 +33,6 @@ namespace Domain.Models.Entities
         [Required]
         public int CourseId { get; set; }
 
-        [ForeignKey("CourseId")]
         public Course Course { get; set; }
 
         public List<Activity> Activities { get; set; }

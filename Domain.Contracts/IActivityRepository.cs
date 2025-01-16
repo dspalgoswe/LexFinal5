@@ -9,7 +9,8 @@ namespace Domain.Contracts
 {
     public interface IActivityRepository : IRepositoryBase<Activity>
     {
-        Task<IEnumerable<Activity>> GetActivitiesByModuleIdAsync(int moduleId);
+        Task<Activity?> GetActivityByIdAsync(int activityId, bool trackChanges = false);
+        Task<IEnumerable<Activity>> GetActivitiesByModuleIdAsync(int moduleId, bool trackChanges = false);
         Task<Activity> GetActivityByIdWithDetailsAsync(int activityId);
     }
 }

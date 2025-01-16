@@ -71,12 +71,12 @@ namespace LMS.Presemtation.Controllers
 
         // POST: api/teacher/courses
         [HttpPost("courses")]
-        public async Task<ActionResult<CourseDto>> CreateCourse(CreateCourseDto courseDto)
-        {
-            var course = _mapper.Map<Course>(courseDto);
-            var result = await _courseService.CreateCourseAsync(course);
-            return CreatedAtAction(nameof(GetCourses), _mapper.Map<CourseDto>(result));
-        }
+        //public async Task<ActionResult<CourseDto>> CreateCourse(CreateCourseDto courseDto)
+        //{
+        //    var course = _mapper.Map<Course>(courseDto);
+        //    var result = await _courseService.CreateCourseAsync(Course);
+        //    return CreatedAtAction(nameof(GetCourses), _mapper.Map<CourseDto>(result));
+        //}
 
         // POST: api/teacher/modules
         [HttpPost("modules")]

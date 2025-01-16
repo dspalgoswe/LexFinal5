@@ -25,18 +25,21 @@ namespace Domain.Models.Entities
         [Required]
         public DateTime EndDate { get; set; }
 
-        [Required]
         public int ModuleId { get; set; }
 
-        [ForeignKey("ModuleId")]
         public Module Module { get; set; }
 
-        [Required]
         public int ActivityTypeId { get; set; }
 
-        [ForeignKey("ActivityTypeId")]
         public ActivityType ActivityType { get; set; }
 
         public List<Document> Documents { get; set; }
     }
+
+    //public class ActivityTypeDto
+    //{
+    //    public int ActivityTypeId { get; set; }
+    //    public string? Type { get; set; }
+    //    public string? Deadlines { get; set; }
+    //}
 }

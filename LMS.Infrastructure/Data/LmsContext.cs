@@ -17,14 +17,20 @@ public class LmsContext : IdentityDbContext<ApplicationUser, IdentityRole, strin
     public DbSet<ActivityType> ActivityTypes { get; set; }
     public DbSet<Document> Documents { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(builder);
+        base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Activity>()
+            .HasOne(a => a.Module)
+            .WithMany(m => m.Activities)
+            .HasForeignKey(a => a.ModuleId)
+            .OnDelete(DeleteBehavior.Restrict);  // Restrict or SetNull instead of Cascade
 
-        builder.Entity<ApplicationUser>()
-            .HasOne(u => u.Course)
-            .WithMany(c => c.Users)
-            .HasForeignKey(u => u.CourseId);
+        modelBuilder.Entity<Module>()
+            .HasOne(m => m.Course)
+            .WithMany(c => c.Modules)
+            .HasForeignKey(m => m.CourseId)
+            .OnDelete(DeleteBehavior.Restrict);  // Restrict or SetNull instead of Cascade
     }
 }

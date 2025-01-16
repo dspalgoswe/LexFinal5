@@ -9,25 +9,19 @@ public class UnitOfWork : IUnitOfWork
     private ICourseRepository _courseRepository;
     private IModuleRepository _moduleRepository;
     private IActivityRepository _activityRepository;
+      
+
+ 
 
     public UnitOfWork(LmsContext context)
     {
-        _context = context;
-    }
+        _context = context;    }
 
-    public ICourseRepository Course =>
-        _courseRepository ??= new CourseRepository(_context);
+    public ICourseRepository Course => throw new NotImplementedException();
 
-    public IModuleRepository Module =>
-        _moduleRepository ??= new ModuleRepository(_context);
+    public IModuleRepository Module => throw new NotImplementedException();
 
-    public IActivityRepository Activity =>
-        _activityRepository ??= new ActivityRepository(_context);
-
-    public async Task CompleteAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
+    public IActivityRepository Activity => throw new NotImplementedException();
 
     public Task CompleteASync()
     {

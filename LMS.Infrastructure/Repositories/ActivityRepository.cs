@@ -15,21 +15,21 @@ namespace LMS.Infrastructure.Repositories
         public ActivityRepository(LmsContext context) : base(context)
         {
         }
-
-        public async Task<IEnumerable<Activity>> GetActivitiesByModuleIdAsync(int moduleId)
+        public async Task<Activity?> GetActivityByIdAsync(int activityId, bool trackChanges = false)
         {
-            return await FindByCondition(a => a.ModuleId == moduleId)
+            return await FindByCondition(a => a.ActivityId == activityId, trackChanges)
                 .Include(a => a.ActivityType)
-                .Include(a => a.Documents)
-                .ToListAsync();
+                .FirstOrDefaultAsync();
+        }
+        public Task<IEnumerable<Activity>> GetActivitiesByModuleIdAsync(int moduleId, bool trackChanges = false)
+        {
+            throw new NotImplementedException();
         }
 
-        public async Task<Activity> GetActivityByIdWithDetailsAsync(int activityId)
+
+        public Task<Activity> GetActivityByIdWithDetailsAsync(int activityId)
         {
-            return await FindByCondition(a => a.ActivityId == activityId)
-                .Include(a => a.ActivityType)
-                .Include(a => a.Documents)
-                .FirstOrDefaultAsync();
+            throw new NotImplementedException();
         }
     }
 }

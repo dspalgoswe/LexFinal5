@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Domain.Contracts;
 using Domain.Models.Entities;
 using LMS.Infrastructure.Data;
 using LMS.Shared.DTOs;
@@ -12,75 +13,49 @@ namespace LMS.Services
 {
     public class ModuleService : IModuleService
     {
-        private readonly LmsContext _context;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public ModuleService(LmsContext context, IMapper mapper)
+        public ModuleService(IUnitOfWork uow, IMapper mapper)
         {
-            _context = context;
+            _uow = uow;
             _mapper = mapper;
         }
-
-        public async Task<IEnumerable<ModuleDto>> GetAllModulesAsync()
-        {
-            var modules = await _context.Modules
-                .Include(m => m.Activities)
-                .Include(m => m.Documents)
-                .ToListAsync();
-            return _mapper.Map<IEnumerable<ModuleDto>>(modules);
-        }
-
-        public async Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(int courseId)
-        {
-            var modules = await _context.Modules
-                .Include(m => m.Activities)
-                .Include(m => m.Documents)
-                .Where(m => m.CourseId == courseId)
-                .ToListAsync();
-            return _mapper.Map<IEnumerable<ModuleDto>>(modules);
-        }
-
         public async Task<ModuleDto> GetModuleByIdAsync(int moduleId)
         {
-            var module = await _context.Modules
-                .Include(m => m.Activities)
-                .Include(m => m.Documents)
-                .FirstOrDefaultAsync(m => m.ModuleId == moduleId);
+            Module? module = await _uow.Module.GetModuleByIdAsync(moduleId);
             return _mapper.Map<ModuleDto>(module);
         }
 
-        public async Task<ModuleDto> CreateModuleAsync(ModuleDto moduleDto)
+        public async Task<ModuleDto> CreateModuleAsync(ModuleDto dto)
         {
-            var module = _mapper.Map<Module>(moduleDto);
-            await _context.Modules.AddAsync(module);
-            await _context.SaveChangesAsync();
+            Module module = _mapper.Map<Module>(dto);
+
+            _uow.Module.Create(module);
+
+            await _uow.CompleteASync();
+
             return _mapper.Map<ModuleDto>(module);
         }
 
-        public async Task<bool> UpdateModuleAsync(int moduleId, ModuleDto moduleDto)
+        public Task<IEnumerable<ModuleDto>> GetAllModulesAsync()
         {
-            var existingModule = await _context.Modules
-                .Include(m => m.Activities)
-                .Include(m => m.Documents)
-                .FirstOrDefaultAsync(m => m.ModuleId == moduleId);
-
-            if (existingModule == null)
-                return false;
-
-            _mapper.Map(moduleDto, existingModule);
-            await _context.SaveChangesAsync();
-            return true;
+            throw new NotImplementedException();
         }
 
-        public async Task<bool> DeleteModuleAsync(int moduleId)
+        public Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(int courseId)
         {
-            var module = await _context.Modules.FirstOrDefaultAsync(m => m.ModuleId == moduleId);
-            if (module == null)
-                return false;
+            throw new NotImplementedException();
+        }
+      
+        public Task<bool> UpdateModuleAsync(int moduleId, ModuleDto moduleDto)
+        {
+            throw new NotImplementedException();
+        }
 
-            _context.Modules.Remove(module);
-            await _context.SaveChangesAsync();
-            return true;
+        public Task<bool> DeleteModuleAsync(int moduleId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

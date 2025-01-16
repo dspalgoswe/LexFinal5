@@ -15,21 +15,31 @@ namespace LMS.Infrastructure.Repositories
         public CourseRepository(LmsContext context) : base(context)
         {
         }
-
-        public async Task<IEnumerable<Course>> GetAllCoursesWithDetailsAsync()
+        public async Task<List<Course>> GetAllCoursesAsync(bool trackChanges = false)
         {
-            return await FindAll()
+            return await FindAll(trackChanges)
                 .Include(c => c.Modules)
-                .Include(c => c.Users)
-                .Include(c => c.Documents)
+                .ThenInclude(m => m.Activities)
                 .ToListAsync();
         }
-        public async Task<Course> GetCourseByIdWithDetailsAsync(int courseId)
+        public async Task<Course?> GetCourseByIdAsync(int courseId, bool trackChanges = false)
         {
-            return await FindByCondition(c => c.CourseId == courseId)
+            return await
+                FindByCondition(c => c.CourseId.Equals(courseId), trackChanges)
                 .Include(c => c.Modules)
+                .ThenInclude(m => m.Activities)
+                .ThenInclude(a => a.ActivityType)
                 .Include(c => c.Users)
-                .Include(c => c.Documents)
+                .FirstOrDefaultAsync();
+        }
+        public async Task<Course?> GetCourseByUserIdAsync(string userId, bool trackChanges = false)
+        {
+            return await
+                FindByCondition(c => c.Users.Any(u => u.Id == userId), trackChanges)
+                .Include(c => c.Modules)
+                .ThenInclude(m => m.Activities)
+                .ThenInclude(a => a.ActivityType)
+                .Include(c => c.Users)
                 .FirstOrDefaultAsync();
         }
 
@@ -42,6 +52,5 @@ namespace LMS.Infrastructure.Repositories
         {
             throw new NotImplementedException();
         }
-
     }
 }

@@ -18,7 +18,7 @@ namespace Domain.Models.Entities
             Documents = new List<Document>();
         }
 
-        [Key]
+        [Required]
         public int CourseId { get; set; }
 
         [Required]
@@ -29,6 +29,7 @@ namespace Domain.Models.Entities
 
         [Required]
         public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         public List<ApplicationUser> Users { get; set; }
 

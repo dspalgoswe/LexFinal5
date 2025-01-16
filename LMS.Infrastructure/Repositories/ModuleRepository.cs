@@ -16,20 +16,9 @@ namespace LMS.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<Module>> GetModulesByCourseIdAsync(int courseId)
+        public async Task<Module?> GetModuleByIdAsync(int moduleId, bool trackChanges = false)
         {
-            return await FindByCondition(m => m.CourseId == courseId)
-                .Include(m => m.Activities)
-                .Include(m => m.Documents)
-                .ToListAsync();
-        }
-
-        public async Task<Module> GetModuleByIdWithDetailsAsync(int moduleId)
-        {
-            return await FindByCondition(m => m.ModuleId == moduleId)
-                .Include(m => m.Activities)
-                .Include(m => m.Documents)
-                .FirstOrDefaultAsync();
+            return await FindByCondition(m => m.ModuleId == moduleId, trackChanges).FirstOrDefaultAsync();
         }
     }
 }

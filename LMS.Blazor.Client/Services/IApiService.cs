@@ -5,13 +5,9 @@ namespace LMS.Blazor.Client.Services;
 
 public interface IApiService
 {
-    Task<IEnumerable<DemoDto>> CallApiAsync();
+    Task<TResponse?> GetAsync<TResponse>(string endpoint);
+    Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest dto);
 }
 
-public class MockApiService : IApiService
-{
-    public Task<IEnumerable<DemoDto>> CallApiAsync()
-    {
-        throw new NotImplementedException();
-    }
-}
+
+
