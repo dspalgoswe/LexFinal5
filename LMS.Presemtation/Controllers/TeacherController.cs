@@ -13,22 +13,31 @@ using Services.Contracts;
 
 namespace LMS.Presemtation.Controllers
 {
-
     [ApiController]
-    [Route("api/[controller]")]
-    public class CoursesController : ControllerBase
+    [Route("api/teacher")]
+    [Authorize(Policy = "TeacherPolicy")]
+    public class TeacherController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ICourseService _courseService;
+        private readonly IModuleService _moduleService;
+        private readonly IActivityService _activityService;
 
-        public CoursesController(IMapper mapper, ICourseService courseService)
+        public TeacherController(
+            IMapper mapper,
+            ICourseService courseService,
+            IModuleService moduleService,
+            IActivityService activityService)
         {
             _mapper = mapper;
             _courseService = courseService;
+            _moduleService = moduleService;
+            _activityService = activityService;
         }
 
+        // GET: api/teacher/courses
         // Both teachers and students can view courses
-        [HttpGet]
+        [HttpGet("courses")]
         [Authorize(Roles = "Teacher,Student")]
         public async Task<ActionResult<IEnumerable<CourseDto>>> GetCourses()
         {
@@ -36,79 +45,60 @@ namespace LMS.Presemtation.Controllers
             return Ok(_mapper.Map<IEnumerable<CourseDto>>(courses));
         }
 
-        // Only teachers can create courses
-        [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<CourseDto>> CreateCourse(CreateCourseDto courseDto)
+        // GET: api/teacher/courses/{courseId}/modules
+        [HttpGet("courses/{courseId}/modules")]
+        public async Task<ActionResult<IEnumerable<ModuleDto>>> GetModulesByCourse(int courseId)
         {
-            var course = _mapper.Map<Course>(courseDto);
-            var result = await _courseService.CreateCourseAsync(course);
-            return CreatedAtAction(nameof(GetCourses), _mapper.Map<CourseDto>(result));
-        }
-    }
-
-    [ApiController]
-    [Route("api/[controller]")]
-    public class DocumentsController : ControllerBase
-    {
-        private readonly IMapper _mapper;
-        private readonly IDocumentService _documentService;
-
-        public DocumentsController(IMapper mapper, IDocumentService documentService)
-        {
-            _mapper = mapper;
-            _documentService = documentService;
+            var modules = await _moduleService.GetModulesByCourseIdAsync(courseId);
+            if (modules == null)
+            {
+                return NotFound();
+            }
+            return Ok(_mapper.Map<IEnumerable<ModuleDto>>(modules));
         }
 
-        // Both teachers and students can view documents
-        [HttpGet]
-        [Authorize(Policy ="StudentDocumentAccess")]
-        public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocuments()
+        // GET: api/teacher/modules/{moduleId}/activities
+        [HttpGet("modules/{moduleId}/activities")]
+        public async Task<ActionResult<IEnumerable<ActivityDto>>> GetActivitiesByModule(int moduleId)
         {
-            var documents = await _documentService.GetAllDocumentsAsync();
-            return Ok(_mapper.Map<IEnumerable<DocumentDto>>(documents));
+            var activities = await _activityService.GetActivitiesByModuleIdAsync(moduleId);
+            if (activities == null)
+            {
+                return NotFound();
+            }
+            return Ok(_mapper.Map<IEnumerable<ActivityDto>>(activities));
         }
 
-        // Both teachers and students can upload documents
-        //[HttpPost]
-        //[Authorize(Policy = "StudentDocumentAccess")]
-        //public async Task<ActionResult<DocumentDto>> UploadDocument(CreateDocumentDto documentDto)
+        // POST: api/teacher/courses
+        [HttpPost("courses")]
+        //public async Task<ActionResult<CourseDto>> CreateCourse(CreateCourseDto courseDto)
         //{
-        //    var document = _mapper.Map<Document>(documentDto);
-        //    document.ApplicationUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        //    var result = await _documentService.CreateDocumentAsync(documentDto);
-        //    return CreatedAtAction(nameof(GetDocuments), _mapper.Map<DocumentDto>(result));
+        //    var course = _mapper.Map<Course>(courseDto);
+        //    var result = await _courseService.CreateCourseAsync(Course);
+        //    return CreatedAtAction(nameof(GetCourses), _mapper.Map<CourseDto>(result));
         //}
 
-        //// Activity CRUD
-        //[HttpPost("activities")]
-        //public async Task<IActionResult> CreateActivity([FromBody] CreateActivityDto activityDto)
-        //{
-        //    var activity = await TeacherService.CreateActivity(activityDto);
-        //    return CreatedAtAction(nameof(GetModuleActivities), new { moduleId = activity.Module.ModuleId }, activity);
-        //}
+        // POST: api/teacher/modules
+        [HttpPost("modules")]
+        public async Task<ActionResult<ModuleDto>> CreateModule(CreateModuleDto moduleDto)
+        {
+            var module = _mapper.Map<Module>(moduleDto);
+            var result = await _moduleService.CreateModuleAsync(_mapper.Map<ModuleDto>(module)); // Change here
+            return CreatedAtAction(nameof(GetModulesByCourse),
+                new { courseId = moduleDto.CourseId },
+                _mapper.Map<ModuleDto>(result));
+        }
 
-        //[HttpPut("activities/{activityId}")]
-        //public async Task<IActionResult> UpdateActivity(int activityId, [FromBody] UpdateActivityDto activityDto)
-        //{
-        //    var result = await _teacherService.UpdateActivityAsync(activityId, activityDto);
-        //    if (!result)
-        //        return NotFound();
-
-        //    return Ok();
-        //}
-
-        //[HttpDelete("activities/{activityId}")]
-        //public async Task<IActionResult> DeleteActivity(int activityId)
-        //{
-        //    var result = await TeacherService.DeleteActivityAsync(activityId);
-        //    if (!result)
-        //        return NotFound();
-
-        //    return Ok();
-        //}
+        // POST: api/teacher/activities
+        [HttpPost("activities")]
+        public async Task<ActionResult<ActivityDto>> CreateActivity(CreateActivityDto activityDto)
+        {
+            var activityDtoMapped = _mapper.Map<ActivityDto>(activityDto); // Change here
+            var result = await _activityService.CreateActivityAsync(activityDtoMapped); // Use the DTO
+            return CreatedAtAction(nameof(GetActivitiesByModule),
+                new { moduleId = activityDto.ModuleId },
+                result); // Already in DTO format
+        }
     }
 }
-
 

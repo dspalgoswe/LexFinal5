@@ -63,7 +63,10 @@ builder.Services.AddHttpClient("LmsAPIClient", cfg =>
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 10000);
 
 builder.Services.AddSingleton<ITokenStorage, TokenStorageService>();
+//builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
+//builder.Services.AddScoped<ITeacherService, TeacherService>(); 
+//builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

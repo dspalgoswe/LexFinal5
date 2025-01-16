@@ -10,7 +10,7 @@ namespace Domain.Models.Entities
 {
     public class Document
     {
-        public int Id { get; set; }
+        public int DocumentId { get; set; }
 
         [Required]
         public string? Name { get; set; }

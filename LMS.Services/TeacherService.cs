@@ -1,132 +1,158 @@
-﻿using Domain.Models.Entities;
-using LMS.Infrastructure.Data;
-using LMS.Shared.DTOs;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Services.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//using AutoMapper;
+//using Domain.Contracts;
+//using Domain.Models.Entities;
+//using LMS.Shared.DTOs;
+//using Microsoft.AspNetCore.Identity;
+//using Microsoft.EntityFrameworkCore;
+//using Services.Contracts;
 
-namespace LMS.Services
-{
-    public class TeacherService : ITeacherService
-    {
-        private readonly LmsContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<TeacherService> _logger;
+//namespace LMS.Services
+//{
+//    public class TeacherService : ITeacherService
+//    {
+//        private readonly IUnitOfWork _unitOfWork;
+//        private readonly IMapper _mapper;
+//        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TeacherService(
-            LmsContext context,
-            UserManager<ApplicationUser> userManager,
-            ILogger<TeacherService> logger)
-        {
-            _context = context;
-            _userManager = userManager;
-            _logger = logger;
-        }
+//        public TeacherService(
+//            IUnitOfWork unitOfWork,
+//            IMapper mapper,
+//            UserManager<ApplicationUser> userManager)
+//        {
+//            _unitOfWork = unitOfWork;
+//            _mapper = mapper;
+//            _userManager = userManager;
+//        }
 
-        public async Task<IEnumerable<Course>> GetAllCoursesAsync()
-        {
-            return await _context.Courses
-                .Include(c => c.Modules)
-                .Include(c => c.Users)
-                .ToListAsync();
-        }
+//        public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync()
+//        {
+//            var courses = await _unitOfWork.Course.GetAllWithDetailsAsync();
+//            return _mapper.Map<IEnumerable<CourseDto>>(courses);
+//        }
 
-        public async Task<IEnumerable<Module>> GetModulesByCourseIdAsync(int courseId)
-        {
-            return await _context.Modules
-                .Where(m => m.Course.CourseId == courseId)
-                .Include(m => m.Activities)
-                .ToListAsync();
-        }
+//        public async Task<CourseDto> CreateCourseAsync(CreateCourseDto courseDto)
+//        {
+//            if (courseDto == null) throw new ArgumentNullException(nameof(courseDto));
 
-        public async Task<IEnumerable<Activity>> GetActivitiesByModuleIdAsync(int moduleId)
-        {
-            return await _context.Activities
-                .Where(a => a.Module.ModuleId == moduleId)
-                .Include(a => a.ActivityType)
-                .ToListAsync();
-        }
+//            var users = await _userManager.Users
+//                .Where(u => courseDto.UserIds.Contains(u.Id))
+//                .ToListAsync();
 
-        public async Task<IdentityResult> CreateUserAsync(CreateUserDto userDto)
-        {
-            var user = new ApplicationUser
-            {
-                UserName = userDto.Email,
-                Email = userDto.Email
-            };
+//            if (users.Count != courseDto.UserIds.Count)
+//                throw new KeyNotFoundException("One or more users were not found.");
 
-            var result = await _userManager.CreateAsync(user, userDto.Password);
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, userDto.Role);
-            }
+//            var course = _mapper.Map<Course>(courseDto);
+//            course.Users = users;
 
-            return result;
-        }
+//            _unitOfWork.Course.Create(course);
+//            await _unitOfWork.CompleteASync();
 
-        public async Task<IdentityResult> UpdateUserAsync(string userId, UpdateUserDto userDto)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                throw new KeyNotFoundException("User not found");
+//            return _mapper.Map<CourseDto>(course);
+//        }
 
-            user.Email = userDto.Email;
-            user.UserName = userDto.Email;
+//        public async Task<IEnumerable<ModuleDto>> GetModulesByCourseIdAsync(int courseId)
+//        {
+//            var modules = await _unitOfWork.Module.GetModulesByCourseIdAsync(courseId);
+//            return _mapper.Map<IEnumerable<ModuleDto>>(modules);
+//        }
 
-            return await _userManager.UpdateAsync(user);
-        }
+//        public async Task<IEnumerable<ActivityDto>> GetActivitiesByModuleIdAsync(int moduleId)
+//        {
+//            var activities = await _unitOfWork.Activity.GetActivitiesByModuleIdAsync(moduleId);
+//            return _mapper.Map<IEnumerable<ActivityDto>>(activities);
+//        }
 
-        public Task<Course> CreateCourseAsync(CreateCourseDto courseDto)
-        {
-            throw new NotImplementedException();
-        }
+//        public async Task<ModuleDto> CreateModuleAsync(CreateModuleDto moduleDto)
+//        {
+//            var module = _mapper.Map<Module>(moduleDto);
+//            _unitOfWork.Module.Create(module);
+//            await _unitOfWork.CompleteASync();
+//            return _mapper.Map<ModuleDto>(module);
+//        }
 
-        public Task<bool> UpdateCourseAsync(int courseId, UpdateCourseDto courseDto)
-        {
-            throw new NotImplementedException();
-        }
+//        public async Task<bool> UpdateModuleAsync(int moduleId, UpdateModuleDto moduleDto)
+//        {
+//            var module = await _unitOfWork.Module
+//                .FindByCondition(m => m.ModuleId == moduleId)
+//                .FirstOrDefaultAsync();
 
-        public Task<bool> DeleteCourseAsync(int courseId)
-        {
-            throw new NotImplementedException();
-        }
+//            if (module == null) return false;
 
-        public Task<Module> CreateModuleAsync(CreateModuleDto moduleDto)
-        {
-            throw new NotImplementedException();
-        }
+//            _mapper.Map(moduleDto, module);
+//            _unitOfWork.Module.Update(module);
+//            await _unitOfWork.CompleteASync();
+//            return true;
+//        }
 
-        public Task<bool> UpdateModuleAsync(int moduleId, UpdateModuleDto moduleDto)
-        {
-            throw new NotImplementedException();
-        }
+//        public async Task<bool> DeleteModuleAsync(int moduleId)
+//        {
+//            var module = await _unitOfWork.Module
+//                .FindByCondition(m => m.ModuleId == moduleId)
+//                .FirstOrDefaultAsync();
 
-        public Task<bool> DeleteModuleAsync(int moduleId)
-        {
-            throw new NotImplementedException();
-        }
+//            if (module == null) return false;
 
-        public Task<Activity> CreateActivityAsync(CreateActivityDto activityDto)
-        {
-            throw new NotImplementedException();
-        }
+//            _unitOfWork.Module.Delete(module);
+//            await _unitOfWork.CompleteASync();
+//            return true;
+//        }
 
-        public Task<bool> UpdateActivityAsync(int activityId, UpdateActivityDto activityDto)
-        {
-            throw new NotImplementedException();
-        }
+//        public async Task<ActivityDto> CreateActivityAsync(CreateActivityDto activityDto)
+//        {
+//            var activity = _mapper.Map<Activity>(activityDto);
+//            _unitOfWork.Activity.Create(activity);
+//            await _unitOfWork.CompleteASync();
 
-        public Task<bool> DeleteActivityAsync(int activityId)
-        {
-            throw new NotImplementedException();
-        }
+//            var createdActivity = await _unitOfWork.Activity
+//                .GetActivityByIdWithDetailsAsync(activity.ActivityId);
+//            return _mapper.Map<ActivityDto>(createdActivity);
+//        }
 
-        // Implement remaining methods following similar patterns...
-    }
-}
+//        public async Task<bool> UpdateActivityAsync(int activityId, UpdateActivityDto activityDto)
+//        {
+//            var activity = await _unitOfWork.Activity
+//                .FindByCondition(a => a.ActivityId == activityId)
+//                .FirstOrDefaultAsync();
+
+//            if (activity == null) return false;
+
+//            _mapper.Map(activityDto, activity);
+//            _unitOfWork.Activity.Update(activity);
+//            await _unitOfWork.CompleteASync();
+//            return true;
+//        }
+
+//        public async Task<bool> DeleteActivityAsync(int activityId)
+//        {
+//            var activity = await _unitOfWork.Activity
+//                .FindByCondition(a => a.ActivityId == activityId)
+//                .FirstOrDefaultAsync();
+
+//            if (activity == null) return false;
+
+//            _unitOfWork.Activity.Delete(activity);
+//            await _unitOfWork.CompleteASync();
+//            return true;
+//        }
+
+//        public Task<IdentityResult> CreateUserAsync(CreateUserDto userDto)
+//        {
+//            throw new NotImplementedException();
+//        }
+
+//        public Task<IdentityResult> UpdateUserAsync(string userId, UpdateUserDto userDto)
+//        {
+//            throw new NotImplementedException();
+//        }
+
+//        public Task<bool> UpdateCourseAsync(int courseId, UpdateCourseDto courseDto)
+//        {
+//            throw new NotImplementedException();
+//        }
+
+//        public Task<bool> DeleteCourseAsync(int courseId)
+//        {
+//            throw new NotImplementedException();
+//        }
+//    }
+//}

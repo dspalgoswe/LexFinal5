@@ -11,7 +11,7 @@ namespace Domain.Models.Entities
 {
     public class Course
     {
-        public Course()
+        public Course() 
         {
             Modules = new List<Module>();
             Users = new List<ApplicationUser>();
@@ -20,16 +20,21 @@ namespace Domain.Models.Entities
 
         [Required]
         public int CourseId { get; set; }
+
         [Required]
-        public string? Name { get; set; }
+        public string Name { get; set; }
+
         [Required]
-        public string? Description { get; set; }
+        public string Description { get; set; }
+
         [Required]
         public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
-        // Navigation properties - changed to List<T>
         public List<ApplicationUser> Users { get; set; }
+
         public List<Module> Modules { get; set; }
+
         public List<Document> Documents { get; set; }
     }
 }
