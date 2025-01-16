@@ -29,10 +29,11 @@ namespace LMS.Services
             Course? course = await _uow.Course.GetCourseByIdAsync(courseId);
             if (course == null)
             {
-                // Do something
+                
             }
             return _mapper.Map<CourseDto>(course);
         }
+
         public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync()
         {
             var courses = await _uow.Course.GetAllCoursesAsync();
@@ -48,6 +49,7 @@ namespace LMS.Services
 
             return _mapper.Map<CourseDto>(course);
         }
+
         public Task<bool> AddUserToCourseAsync(int courseId, string userId)
         {
             throw new NotImplementedException();
@@ -74,9 +76,20 @@ namespace LMS.Services
             throw new NotImplementedException();
         }
 
-        public Task<Course> UpdateCourseAsync(int id, CourseDto courseDto)
+        public async Task<Course> UpdateCourseAsync(int courseId, CourseDto courseDto)
         {
-            throw new NotImplementedException();
+            var course = await _uow.Course.GetCourseByIdAsync(courseId);
+            if (course == null)
+            {
+                return null;
+            }
+
+            // Map updated properties from DTO to the entity
+            _mapper.Map(courseDto, course);
+            _uow.Course.Update(course);
+            await _uow.CompleteASync();
+
+            return course;
         }
     }
 }

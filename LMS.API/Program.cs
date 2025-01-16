@@ -43,6 +43,7 @@ public class Program
         builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
         builder.Services.AddScoped<ICourseRepository, CourseRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddScoped<ICourseService, CourseService>();
 
         builder.Services.AddIdentityCore<ApplicationUser>(opt =>
             {

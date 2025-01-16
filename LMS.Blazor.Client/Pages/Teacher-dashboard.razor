@@ -1,0 +1,115 @@
+﻿@page "/teacher-dashboard"
+@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs
+@inject IApiService ApiService
+
+<h3>Teacher Dashboard - Course Overview</h3>
+
+@if (courses == null)
+{
+    <p>Loading courses...</p>
+}
+else if (!courses.Any())
+{
+    <p>No courses available.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Course Name</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var course in courses)
+                {
+                    <tr>
+                        <td>@course.Name</td>
+                        <td>@course.Description</td>
+                        <td>
+                            <button class="btn btn-primary me-2" @onclick="@(() => EditCourse(course.CourseId))">Edit</button>
+                            <button class="btn btn-danger" @onclick="@(() => DeleteCourse(course.CourseId))">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<button class="btn btn-success mt-3" @onclick="AddNewCourse">Add New Course</button>
+
+@code {
+    private List<CourseDto>? courses;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCourses();
+    }
+
+    private async Task LoadCourses()
+    {
+        try
+        {
+            var response = await ApiService.GetAsync<List<CourseDto>>("api/courses");
+            courses = response ?? new List<CourseDto>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading courses: {ex.Message}");
+            courses = new List<CourseDto>();
+        }
+    }
+
+    private async Task AddNewCourse()
+    {
+        try
+        {
+            var newCourse = new CourseDto
+                {
+                    Name = "New Course",
+                    Description = "New Description"
+                };
+
+            var response = await ApiService.PostAsync<CourseDto, CourseDto>("api/courses", newCourse);
+            await LoadCourses();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding course: {ex.Message}");
+        }
+    }
+
+    private async Task EditCourse(int courseId)
+    {
+        try
+        {
+            var course = courses?.FirstOrDefault(c => c.CourseId == courseId);
+            if (course != null)
+            {
+                var response = await ApiService.PutAsync<CourseDto, CourseDto>($"api/courses/{courseId}", course);
+                await LoadCourses();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error editing course: {ex.Message}");
+        }
+    }
+    private async Task DeleteCourse(int courseId)
+    {
+        try
+        {
+            await ApiService.DeleteAsync($"api/courses/{courseId}");
+            await LoadCourses();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting course: {ex.Message}");
+        }
+    }
+}
