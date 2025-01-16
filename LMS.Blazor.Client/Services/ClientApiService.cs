@@ -40,6 +40,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
         var res = await JsonSerializer.DeserializeAsync<TResponse>(await response.Content.ReadAsStreamAsync(), _jsonSerializerOptions, CancellationToken.None);
         return res;
     }
+   
     public async Task<TResponse?> GetAsync<TResponse>(string endpoint)
     {
         return await CallApiAsync<object?, TResponse>(
@@ -57,5 +58,29 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
             HttpMethod.Post,
             dto
         );
+    }
+
+    public async Task<TResponse?> DeleteAsync<TRequest, TResponse>(
+     string endpoint,
+     TRequest dto)
+    {
+        return await CallApiAsync<TRequest, TResponse>(
+            endpoint,
+            HttpMethod.Post,
+            dto
+        );
+    }
+
+    public async Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest dto)
+    {
+        return await CallApiAsync<TRequest, TResponse>(
+            endpoint,
+            HttpMethod.Put,
+            dto
+        );
+    }
+    public Task DeleteAsync(string url)
+    {
+        throw new NotImplementedException();
     }
 }

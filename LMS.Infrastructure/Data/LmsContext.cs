@@ -21,16 +21,28 @@ public class LmsContext : IdentityDbContext<ApplicationUser, IdentityRole, strin
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Activity>()
-            .HasOne(a => a.Module)
-            .WithMany(m => m.Activities)
-            .HasForeignKey(a => a.ModuleId)
-            .OnDelete(DeleteBehavior.Restrict);  // Restrict or SetNull instead of Cascade
+        modelBuilder.Entity<Course>(entity =>
+        {
+            entity.HasKey(e => e.CourseId);
+            entity.Property(e => e.CourseId).UseIdentityColumn();
+        });
 
-        modelBuilder.Entity<Module>()
-            .HasOne(m => m.Course)
-            .WithMany(c => c.Modules)
-            .HasForeignKey(m => m.CourseId)
-            .OnDelete(DeleteBehavior.Restrict);  // Restrict or SetNull instead of Cascade
+        modelBuilder.Entity<Module>(entity =>
+        {
+            entity.HasKey(e => e.ModuleId);
+            entity.Property(e => e.ModuleId).UseIdentityColumn();
+        });
+
+        modelBuilder.Entity<Activity>(entity =>
+        {
+            entity.HasKey(e => e.ActivityId);
+            entity.Property(e => e.ActivityId).UseIdentityColumn();
+        });
+
+        modelBuilder.Entity<ActivityType>(entity =>
+        {
+            entity.HasKey(e => e.ActivityTypeId);
+            entity.Property(e => e.ActivityTypeId).UseIdentityColumn();
+        });
     }
 }
