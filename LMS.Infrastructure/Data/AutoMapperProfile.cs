@@ -15,23 +15,22 @@ public class AutoMapperProfile : Profile
         CreateMap<CourseDto, Course>()
             .ForMember(dest => dest.CourseId, opt => opt.Ignore())
             .ForMember(dest => dest.Modules, opt => opt.MapFrom(src => src.Modules));
+        CreateMap<CreateCourseDto, CourseDto>().ReverseMap();
 
         // Module mappings
-        CreateMap<Module, ModuleDto>();
-        CreateMap<ModuleDto, Module>()
-            .ForMember(dest => dest.ModuleId, opt => opt.Ignore())
-            .ForMember(dest => dest.Activities, opt => opt.MapFrom(src => src.Activities));
+        CreateMap<Module, ModuleDto>().ReverseMap();
+        CreateMap<ModuleDto, Module>().ReverseMap();
+
 
         // Activity mappings
-        CreateMap<Activity, ActivityDto>();
-        CreateMap<ActivityDto, Activity>()
-            .ForMember(dest => dest.ActivityId, opt => opt.Ignore())
-            .ForMember(dest => dest.ActivityType, opt => opt.MapFrom(src => src.ActivityType));
+        CreateMap<Activity, ActivityDto>().ReverseMap();
+        CreateMap<ActivityDto, Activity>().ReverseMap();
+
 
         // ActivityType mappings
         CreateMap<ActivityType, ActivityTypeDto>();
-        CreateMap<ActivityTypeDto, ActivityType>()
-            .ForMember(dest => dest.ActivityTypeId, opt => opt.Ignore());
+        CreateMap<ActivityTypeDto, ActivityType>();
+          
 
     }
 }

@@ -97,7 +97,7 @@ public static class SeedData
                             ? "Online Course - 3 Inlämningsuppgifter"
                             : faker.Lorem.Paragraph(),
                         StartDate = DateTime.Now.AddDays(faker.Random.Int(1, 30)),
-                        Users = new List<ApplicationUser>(),
+                        EnrolledUsers = new List<ApplicationUser>(),
                         Modules = new List<Module>()
                     };
 
@@ -143,7 +143,7 @@ public static class SeedData
                     var studentGroup = students.Skip(courseNames.ToList().IndexOf(courseName) * 5).Take(5);
                     foreach (var student in studentGroup)
                     {
-                        course.Users.Add(student);
+                        course.EnrolledUsers.Add(student);
                     }
 
                     logger.LogInformation($"Adding course: {courseName} with {course.Modules.Count} modules");
@@ -234,12 +234,6 @@ public static class SeedData
             }
         }
     }
-
-    //private static async Task GenerateCoursesAsync(LmsContext db, UserManager<ApplicationUser> userManager)
-    //{
-        
-    //}
-
     private static string GetModuleName(string courseName, int index) =>
         courseName.Contains(".NET")
             ? index switch

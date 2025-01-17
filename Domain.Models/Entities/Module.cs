@@ -16,7 +16,7 @@ namespace Domain.Models.Entities
             Documents = new List<Document>();
         }
 
-        public int ModuleId { get; set; }
+        public int ModuleId { get; set; }  
 
         [Required]
         public string? Name { get; set; }
@@ -32,13 +32,12 @@ namespace Domain.Models.Entities
 
         [Required]
         public int CourseId { get; set; }
+        public Course Course { get; set; }
 
-        public Course? Course { get; set; }
-
-        public List<Activity> Activities { get; set; }
-
-        public List<Document> Documents { get; set; }
+        public ICollection<Activity> Activities { get; set; }
+        public ICollection<Document> Documents { get; set; }
     }
+
 
 }
 

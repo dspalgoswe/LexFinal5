@@ -49,6 +49,11 @@ namespace LMS.Services
 
             return _mapper.Map<CourseDto>(course);
         }
+        public async Task<IEnumerable<Module>> GetModulesByCourseIdAsync(int courseId)
+        {
+            var modules = await _uow.Module.GetModuleByIdAsync(courseId);
+            return (IEnumerable<Module>)_mapper.Map<ModuleDto>(modules);
+        }
 
         public Task<bool> AddUserToCourseAsync(int courseId, string userId)
         {
@@ -66,10 +71,6 @@ namespace LMS.Services
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Module>> GetModulesByCourseIdAsync(int courseId)
-        {
-            throw new NotImplementedException();
-        }
 
         public Task<bool> RemoveUserFromCourseAsync(int courseId, string userId)
         {
