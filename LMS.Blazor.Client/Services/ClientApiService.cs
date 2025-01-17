@@ -15,7 +15,7 @@ public class ClientApiService(IHttpClientFactory httpClientFactory, NavigationMa
     { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
        
 
-    private async Task<TResponse?> CallApiAsync<TRequest, TResponse>(string endpoint, HttpMethod httpMethod, TRequest? dto)
+    public async Task<TResponse?> CallApiAsync<TRequest, TResponse>(string endpoint, HttpMethod httpMethod, TRequest? dto)
     {
         var request = new HttpRequestMessage(httpMethod, $"proxy-endpoint/{endpoint}");
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

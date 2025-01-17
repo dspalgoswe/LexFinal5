@@ -11,14 +11,13 @@ namespace Domain.Models.Entities
 {
     public class Course
     {
-        public Course() 
+        public Course()
         {
             Modules = new List<Module>();
-            Users = new List<ApplicationUser>();
             Documents = new List<Document>();
+            EnrolledUsers = new List<ApplicationUser>();
         }
 
-        [Required]
         public int CourseId { get; set; }
 
         [Required]
@@ -29,12 +28,14 @@ namespace Domain.Models.Entities
 
         [Required]
         public DateTime StartDate { get; set; }
+
+        [Required]
         public DateTime EndDate { get; set; }
 
-        public List<ApplicationUser> Users { get; set; }
+        // Navigation property for enrolled users
+        public ICollection<ApplicationUser> EnrolledUsers { get; set; }
 
-        public List<Module> Modules { get; set; }
-
-        public List<Document> Documents { get; set; }
+        public ICollection<Module> Modules { get; set; }
+        public ICollection<Document> Documents { get; set; }
     }
 }
