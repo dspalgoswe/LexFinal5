@@ -18,8 +18,8 @@ namespace LMS.Presemtation.Controllers
         [HttpGet("{studentId}/course")]
         public async Task<IActionResult> GetStudentCourse(string studentId)
         {
-            var course = await _context.Courses.Include(c => c.Users)
-                        .FirstOrDefaultAsync(c => c.Users.Any(u => u.Id == studentId));
+            var course = await _context.Courses.Include(c => c.EnrolledUsers)
+                        .FirstOrDefaultAsync(c => c.EnrolledUsers.Any(u => u.Id == studentId));
 
             if (course == null)
             {
