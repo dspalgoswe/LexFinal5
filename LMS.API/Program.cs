@@ -3,11 +3,11 @@ using Domain.Models.Entities;
 using LMS.API.Extensions;
 using LMS.Infrastructure.Data;
 using LMS.Infrastructure.Repositories;
-using LMS.Presemtation;
 using LMS.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Services.Contracts;
+using System.Reflection.Metadata;
 using System.Security.Claims;
 
 
@@ -38,18 +38,16 @@ public class Program
         builder.Services.ConfigureCors();
 
         builder.Services.AddHttpClient();
-        builder.Services.AddScoped<IServiceManager, ServiceManager>();
-        builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
-        builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
-        builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+        //builder.Services.AddScoped<ITeacherService, TeacherService>();
+        //builder.Services.AddLazy<ITeacherService>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-        builder.Services.AddScoped<ICourseService, CourseService>();
+        //builder.Services.AddScoped<ICourseService, CourseService>();
 
         builder.Services.AddIdentityCore<ApplicationUser>(opt =>
-            {
-                opt.SignIn.RequireConfirmedAccount = false;
-                opt.User.RequireUniqueEmail = true;
-            })
+        {
+            opt.SignIn.RequireConfirmedAccount = false;
+            opt.User.RequireUniqueEmail = true;
+        })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<LmsContext>()
                 .AddDefaultTokenProviders();
@@ -62,7 +60,7 @@ public class Program
             // Create a combined policy for administrative actions
             options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Teacher")); // Teachers have admin rights
 
-              options.AddPolicy("StudentDocumentAccess", policy => policy.RequireRole("Student", "Teacher"));
+            options.AddPolicy("StudentDocumentAccess", policy => policy.RequireRole("Student", "Teacher"));
         });
 
         //logging for clearer and easier debugging
