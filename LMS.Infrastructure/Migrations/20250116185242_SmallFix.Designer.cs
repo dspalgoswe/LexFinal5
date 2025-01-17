@@ -4,6 +4,7 @@ using LMS.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LMS.Infrastructure.Migrations
 {
     [DbContext(typeof(LmsContext))]
-    partial class LmsContextModelSnapshot : ModelSnapshot
+    [Migration("20250116185242_SmallFix")]
+    partial class SmallFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -189,21 +192,21 @@ namespace LMS.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentId"));
 
-                    b.Property<int?>("ActivityId")
+                    b.Property<int>("ActivityId")
                         .HasColumnType("int");
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("CourseId")
+                    b.Property<int>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ModuleId")
+                    b.Property<int>("ModuleId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -417,9 +420,8 @@ namespace LMS.Infrastructure.Migrations
             modelBuilder.Entity("Domain.Models.Entities.ApplicationUser", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Course", "Course")
-                        .WithMany("EnrolledUsers")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany("Users")
+                        .HasForeignKey("CourseId");
 
                     b.Navigation("Course");
                 });
@@ -429,9 +431,10 @@ namespace LMS.Infrastructure.Migrations
                     b.HasOne("Domain.Models.Entities.Activity", "Activity")
                         .WithMany("Documents")
                         .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("Domain.Models.Entities.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Domain.Models.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -440,20 +443,22 @@ namespace LMS.Infrastructure.Migrations
                     b.HasOne("Domain.Models.Entities.Course", "Course")
                         .WithMany("Documents")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Models.Entities.Module", "Module")
-                        .WithMany("Documents")
+                        .WithMany()
                         .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Activity");
-
-                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Course");
 
                     b.Navigation("Module");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
@@ -527,16 +532,14 @@ namespace LMS.Infrastructure.Migrations
                 {
                     b.Navigation("Documents");
 
-                    b.Navigation("EnrolledUsers");
-
                     b.Navigation("Modules");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Module", b =>
                 {
                     b.Navigation("Activities");
-
-                    b.Navigation("Documents");
                 });
 #pragma warning restore 612, 618
         }

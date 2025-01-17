@@ -19,30 +19,38 @@ public class LmsContext : IdentityDbContext<ApplicationUser, IdentityRole, strin
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(modelBuilder); // Always call base method
 
-        modelBuilder.Entity<Course>(entity =>
-        {
-            entity.HasKey(e => e.CourseId);
-            entity.Property(e => e.CourseId).UseIdentityColumn();
-        });
+        modelBuilder.Entity<ApplicationUser>()
+        .HasOne(a => a.Course)  // Each ApplicationUser has one Course
+        .WithMany(c => c.EnrolledUsers)  // A Course can have many ApplicationUsers
+        .HasForeignKey(a => a.CourseId)  // The foreign key on ApplicationUser
+        .OnDelete(DeleteBehavior.Restrict); // Avoid cascading deletes for users (if a course is deleted, do not delete users)
 
-        modelBuilder.Entity<Module>(entity =>
-        {
-            entity.HasKey(e => e.ModuleId);
-            entity.Property(e => e.ModuleId).UseIdentityColumn();
-        });
+        // Configure the Document-Module relationship
+        modelBuilder.Entity<Document>()
+            .HasOne(d => d.Course)
+            .WithMany(c => c.Documents)
+            .HasForeignKey(d => d.CourseId)
+            .OnDelete(DeleteBehavior.SetNull);  // Optional, sets CourseId to null if the course is deleted
 
-        modelBuilder.Entity<Activity>(entity =>
-        {
-            entity.HasKey(e => e.ActivityId);
-            entity.Property(e => e.ActivityId).UseIdentityColumn();
-        });
+        modelBuilder.Entity<Document>()
+            .HasOne(d => d.Module)
+            .WithMany(m => m.Documents)
+            .HasForeignKey(d => d.ModuleId)
+            .OnDelete(DeleteBehavior.SetNull); // Optional, sets ModuleId to null if the module is deleted
 
-        modelBuilder.Entity<ActivityType>(entity =>
-        {
-            entity.HasKey(e => e.ActivityTypeId);
-            entity.Property(e => e.ActivityTypeId).UseIdentityColumn();
-        });
+        modelBuilder.Entity<Document>()
+            .HasOne(d => d.Activity)
+            .WithMany(a => a.Documents)
+            .HasForeignKey(d => d.ActivityId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Module>()
+            .Property(m => m.ModuleId)
+            .ValueGeneratedOnAdd();
+        modelBuilder.Entity<Activity>()
+            .Property(a => a.ActivityId)
+            .ValueGeneratedOnAdd();
     }
 }

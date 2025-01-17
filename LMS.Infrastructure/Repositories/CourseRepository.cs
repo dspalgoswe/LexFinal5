@@ -29,17 +29,17 @@ namespace LMS.Infrastructure.Repositories
                 .Include(c => c.Modules)
                 .ThenInclude(m => m.Activities)
                 .ThenInclude(a => a.ActivityType)
-                .Include(c => c.Users)
+                .Include(c => c.EnrolledUsers)
                 .FirstOrDefaultAsync();
         }
         public async Task<Course?> GetCourseByUserIdAsync(string userId, bool trackChanges = false)
         {
             return await
-                FindByCondition(c => c.Users.Any(u => u.Id == userId), trackChanges)
+                FindByCondition(c => c.EnrolledUsers.Any(u => u.Id == userId), trackChanges)
                 .Include(c => c.Modules)
                 .ThenInclude(m => m.Activities)
                 .ThenInclude(a => a.ActivityType)
-                .Include(c => c.Users)
+                .Include(c => c.EnrolledUsers)
                 .FirstOrDefaultAsync();
         }
 

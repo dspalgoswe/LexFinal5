@@ -10,7 +10,11 @@ namespace Domain.Models.Entities
 {
     public class Activity
     {
-        [Key]
+        public Activity()
+        {
+            Documents = new List<Document>();
+        }
+
         public int ActivityId { get; set; }
 
         [Required]
@@ -25,21 +29,14 @@ namespace Domain.Models.Entities
         [Required]
         public DateTime EndDate { get; set; }
 
-        public int ModuleId { get; set; }
-
-        public Module Module { get; set; }
-
+        [Required]
         public int ActivityTypeId { get; set; }
-
         public ActivityType ActivityType { get; set; }
 
-        public List<Document> Documents { get; set; }
-    }
+        [Required]
+        public int ModuleId { get; set; }
+        public Module Module { get; set; }
 
-    //public class ActivityTypeDto
-    //{
-    //    public int ActivityTypeId { get; set; }
-    //    public string? Type { get; set; }
-    //    public string? Deadlines { get; set; }
-    //}
+        public ICollection<Document> Documents { get; set; }
+    }   
 }

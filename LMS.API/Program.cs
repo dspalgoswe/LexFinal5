@@ -42,6 +42,7 @@ public class Program
         //builder.Services.AddLazy<ITeacherService>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<ICourseService, CourseService>();
+        builder.Services.AddScoped<IActivityService, ActivityService>();
 
         builder.Services.AddIdentityCore<ApplicationUser>(opt =>
             {
