@@ -20,7 +20,7 @@ namespace LMS.Presemtation.Controllers
         {
             //Hämtar deltagare som är kopplade till kursen
             var paticipants = await _context.Users
-                .Include(c => c.Courses)
+                .Include(c => c.Course)
                         //.ThenInclude(m => m.Activities)
                         //.ThenInclude(a => a.ActivityType)
                         //.Include(c => c.Users)

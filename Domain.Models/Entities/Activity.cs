@@ -14,10 +14,10 @@ namespace Domain.Models.Entities
         public int ActivityId { get; set; }
 
         [Required]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Required]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Required]
         public DateTime StartDate { get; set; }
@@ -27,13 +27,13 @@ namespace Domain.Models.Entities
 
         public int ModuleId { get; set; }
 
-        public Module Module { get; set; }
+        public Module? Module { get; set; }
 
         public int ActivityTypeId { get; set; }
 
-        public ActivityType ActivityType { get; set; }
+        public ActivityType? ActivityType { get; set; }
 
-        public List<Document> Documents { get; set; }
+        public List<Document>? Documents { get; set; }
     }
 
     //public class ActivityTypeDto
