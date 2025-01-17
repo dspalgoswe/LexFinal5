@@ -6,29 +6,26 @@ namespace LMS.Infrastructure.Repositories;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly LmsContext _context;
-    private ICourseRepository? _courseRepository;
-    private IModuleRepository? _moduleRepository;
-    private IActivityRepository? _activityRepository;
-    private IStudentRepository? _studentRepository;
-      
-
- 
-
+    private readonly Lazy<IActivityRepository> _activityRepository;
+    private readonly Lazy<IModuleRepository> _moduleRepository;
+    private readonly Lazy<ICourseRepository> _courseRepository;
     public UnitOfWork(LmsContext context)
     {
-        _context = context;    }
+        _context = context;
+        _activityRepository = new Lazy<IActivityRepository>(() => new ActivityRepository(_context));
+        _moduleRepository = new Lazy<IModuleRepository>(() => new ModuleRepository(_context));
+        _courseRepository = new Lazy<ICourseRepository>(() => new CourseRepository(_context));
+    } 
+    public ICourseRepository Course => _courseRepository.Value;
 
-    public ICourseRepository Course => throw new NotImplementedException();
+    public IModuleRepository Module => _moduleRepository.Value;
 
-    public IModuleRepository Module => throw new NotImplementedException();
+    public IActivityRepository Activity => _activityRepository.Value;
 
-    public IActivityRepository Activity => throw new NotImplementedException();
 
-    public IStudentRepository Student => throw new NotImplementedException();
-
-    public Task CompleteASync()
+    public async Task CompleteASync()
     {
-        throw new NotImplementedException();
+        await _context.SaveChangesAsync();
     }
 
     public Task<int> SaveChangesAsync()
@@ -36,3 +33,4 @@ public class UnitOfWork : IUnitOfWork
         throw new NotImplementedException();
     }
 }
+

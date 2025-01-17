@@ -44,10 +44,10 @@ public class Program
         //builder.Services.AddScoped<ICourseService, CourseService>();
 
         builder.Services.AddIdentityCore<ApplicationUser>(opt =>
-            {
-                opt.SignIn.RequireConfirmedAccount = false;
-                opt.User.RequireUniqueEmail = true;
-            })
+        {
+            opt.SignIn.RequireConfirmedAccount = false;
+            opt.User.RequireUniqueEmail = true;
+        })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<LmsContext>()
                 .AddDefaultTokenProviders();
@@ -60,7 +60,7 @@ public class Program
             // Create a combined policy for administrative actions
             options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Teacher")); // Teachers have admin rights
 
-              options.AddPolicy("StudentDocumentAccess", policy => policy.RequireRole("Student", "Teacher"));
+            options.AddPolicy("StudentDocumentAccess", policy => policy.RequireRole("Student", "Teacher"));
         });
 
         //logging for clearer and easier debugging

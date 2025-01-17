@@ -21,6 +21,7 @@ namespace LMS.Infrastructure.Repositories
                 .Include(a => a.ActivityType)
                 .FirstOrDefaultAsync();
         }
+
         public Task<IEnumerable<Activity>> GetActivitiesByModuleIdAsync(int moduleId, bool trackChanges = false)
         {
             throw new NotImplementedException();
