@@ -20,5 +20,15 @@ namespace LMS.Infrastructure.Repositories
         {
             return await FindByCondition(m => m.ModuleId == moduleId, trackChanges).FirstOrDefaultAsync();
         }
+
+        public Task<Module> GetModuleByIdWithDetailsAsync(int moduleId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Module>> GetModulesByCourseIdAsync(int courseId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
