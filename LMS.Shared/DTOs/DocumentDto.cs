@@ -16,6 +16,9 @@ namespace LMS.Shared.DTOs
         public string? Description { get; set; }
 
         [Required]
+        public string? FilePath { get; set; }
+
+        [Required]
         public string? Type { get; set; }
 
         public int? ModuleId { get; set; }
@@ -32,6 +35,9 @@ namespace LMS.Shared.DTOs
         public string? Description { get; set; }
 
         [Required]
+        public string? FilePath { get; set; }
+
+        [Required]
         public string? Type { get; set; }
     }
 
@@ -40,6 +46,7 @@ namespace LMS.Shared.DTOs
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
+        public string? FilePath { get; set; }
         public string? Type { get; set; }
         public DateTime TimeStamp { get; set; }
         public string? ApplicationUserId { get; set; }

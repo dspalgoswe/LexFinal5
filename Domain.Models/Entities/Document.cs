@@ -18,6 +18,9 @@ namespace Domain.Models.Entities
         [Required]
         public string? Description { get; set; }
 
+        [Required] 
+        public string? FilePath { get; set; }
+
         [Required]
         public string? Type { get; set; }
 

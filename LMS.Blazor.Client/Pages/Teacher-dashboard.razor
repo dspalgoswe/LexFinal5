@@ -1,6 +1,7 @@
 ﻿@page "/teacher-dashboard"
 @using LMS.Blazor.Client.Services
 @using LMS.Shared.DTOs
+@inject HttpClient Http
 @inject IApiService ApiService
 
 <h3>Teacher Dashboard - Course Overview</h3>
@@ -55,7 +56,7 @@ else
     {
         try
         {
-            var response = await ApiService.GetAsync<List<CourseDto>>("api/courses");
+            var response = await ApiService.GetAsync<List<CourseDto>>("api/endpoint");
             courses = response ?? new List<CourseDto>();
         }
         catch (Exception ex)
