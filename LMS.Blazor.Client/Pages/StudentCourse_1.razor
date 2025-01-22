@@ -1,0 +1,139 @@
+﻿@page "/student"
+@inject IApiService ApiService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@rendermode InteractiveWebAssembly
+
+<h3>Studentens Kursinformation</h3>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <p>Hej auth user</p>
+
+
+@if (LoggedInStudentId == null)
+{
+    <p>Du är inte inloggad.</p>
+}
+
+
+    </Authorized>
+</AuthorizeView>
+
+
+else
+{
+    <div>
+        <h4>Aktuell Kurs</h4>
+        @if (studentCourse != null)
+        {
+            <p><strong>Kursnamn:</strong> @studentCourse.Name</p>
+            <p><strong>Kursdeltagare:</strong></p>
+            <ul>
+                @foreach (var participant in CourseParticipants)
+                {
+                    <li>@participant.FirstName @participant.LastName</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>Ingen kurs hittades.</p>
+        }
+    </div>
+
+    <div>
+        <h4>Moduler i Kursen</h4>
+        @if (Modules != null && Modules.Any())
+        {
+            <ul>
+                @foreach (var module in Modules)
+                {
+                    <li>
+                        <button class="btn btn-link" @onclick="() => CallAPIAsync(module.ModuleId)">
+                            @module.Name
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>Inga moduler hittades för denna kurs.</p>
+        }
+    </div>
+
+
+
+    <div>
+        <h4>Aktiviteter för vald Modul</h4>
+        @if (Activities != null && Activities.Any())
+        {
+            <ul>
+                @foreach (var activity in Activities)
+                {
+                    <li>@activity.Name (@activity.ActivityType)</li>
+                }
+            </ul>
+        }
+        else if (SelectedModuleId != null)
+        {
+            <p>Inga aktiviteter hittades för denna modul.</p>
+        }
+        else
+        {
+            <p>Välj en modul för att se aktiviteter.</p>
+        }
+    </div>
+
+
+
+
+}
+@code {
+    private string? LoggedInStudentId;
+    private CourseDto? studentCourse;
+    private List<UserDto> CourseParticipants = new();
+    private List<ModuleDto> Modules = new();
+    private List<ActivityDto> Activities = new();
+    private int? SelectedModuleId;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Hämtar autentiserad användares ID
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            LoggedInStudentId = user.FindFirst(c => c.Type == "sub")?.Value;
+
+            if (LoggedInStudentId != null)
+            {
+                //Hämtar studentens kurs
+                studentCourse = await ApiService.GetAsync<CourseDto>($"api/student/{LoggedInStudentId}/course");
+                // studentCourse = await ApiService.GetAsync<CourseDto>($"api/student/course");
+
+                if (studentCourse != null)
+                {
+                    //Hämtar kursdeltagare
+                    CourseParticipants = (await ApiService.GetAsync<List<UserDto>>($"api/course/{studentCourse.CourseId}/participants")) ?? new List<UserDto>();
+
+                    //Hämtar moduler för kursen
+                    Modules = (await ApiService.GetAsync<List<ModuleDto>>($"api/course/{studentCourse.CourseId}/modules")) ?? new List<ModuleDto>();
+                }
+            }
+        }
+    }
+
+    private async Task CallAPIAsync(int moduleId)
+    {
+        SelectedModuleId = moduleId;
+        Activities = (await ApiService.GetAsync<List<ActivityDto>>($"api/module/{moduleId}/activities")) ?? new List<ActivityDto>();
+    }
+}

@@ -12,5 +12,5 @@ public class ApplicationUser : IdentityUser
 
     // Foreign key for the course the user is enrolled in
     public int? CourseId { get; set; } 
-    public Course Course { get; set; }
+    public Course? Course { get; set; }
 }

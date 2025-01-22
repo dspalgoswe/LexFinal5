@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using LMS.Infrastructure.Data;
+using LMS.Services;
+using LMS.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

@@ -1,0 +1,142 @@
+﻿@page "/studentCourse"
+@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs
+@inject HttpClient Http
+@inject IApiService ApiService
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Student Information</PageTitle> 
+
+<h1>Student Information</h1>
+
+<!-- Laddarstatus -->
+@if (IsLoading)
+{
+    <p>Loading...</p>
+}
+else if (ErrorMessage != null)
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+else
+{
+    
+    <h2>Kursinformation</h2>
+    <p><strong>Kurs:</strong> @studentCourse.Name</p>
+
+
+    <h3>Kursdeltagare</h3>
+    <ul>
+        @foreach (var participant in CourseParticipants)
+        {
+            <li>@participant.FirstName @participant.LastName  (@participant.Email)</li>
+        }
+    </ul>
+
+
+    <h3>Moduler</h3>
+    <ul>
+        @foreach (var module in Modules)
+        {
+            <li>
+                <!-- Laddar aktiviteter för en modul -->
+                <button class="btn btn-link" @onclick="() => LoadActivities(module.ModuleId)">
+                    @module.Name
+                </button>
+            </li>
+        }
+    </ul>
+
+    <!-- Aktiviteter för en vald modul -->
+    @if (SelectedModuleActivities != null)
+    {
+        <h4>Aktiviteter för modulen "@SelectedModuleName"</h4>
+        <ul>
+            @foreach (var activity in SelectedModuleActivities)
+            {
+                <li>@activity.Name - @activity.Description</li>
+            }
+        </ul>
+    }
+}
+
+@code {
+
+    private bool IsLoading = true; 
+    private string? ErrorMessage = "The page has problem to load"; 
+
+    private CourseDto studentCourse = new();
+    private List<UserDto> CourseParticipants = new(); 
+    private List<ModuleDto> Modules = new(); 
+    private List<ActivityDto>? SelectedModuleActivities = null; //Aktiviteter för vald modul
+    private string SelectedModuleName = ""; //Namn på vald modul
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            //Hämtar studentens kurs
+            studentCourse = await Http.GetFromJsonAsync<CourseDto>($"api/student/course");
+
+            //Hämtar deltagare i kursen
+            CourseParticipants = await Http.GetFromJsonAsync<List<UserDto>>($"api/student/course/participants");
+
+            //Hämtar moduler i kursen
+            Modules = await Http.GetFromJsonAsync<List<ModuleDto>>($"api/student/modules");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Ett fel uppstod: " + ex.Message; //Hanterar fel
+        }
+        finally
+        {
+            IsLoading = false; //När laddningen är klar
+        }
+    }
+
+    private async Task LoadActivities(int moduleId)
+    {
+        try
+        {
+            IsLoading = true; //Laddar aktiviteter
+            SelectedModuleActivities = await Http.GetFromJsonAsync<List<ActivityDto>>($"api/student/module/{moduleId}/activities");
+
+            //Sätter modulnamn för visning
+            SelectedModuleName = Modules.FirstOrDefault(m => m.ModuleId == moduleId)?.Name ?? "Okänd modul";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Ett fel uppstod när aktiviteter skulle laddas: " + ex.Message;
+        }
+        finally
+        {
+            IsLoading = false; //Avslutar laddning
+        }
+
+    }
+
+
+
+    [Inject]
+    private IApiService _apiService { get; set; } = default!;
+    [Inject]
+    private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
+    private List<UserDto>? demo;
+    private CourseDto? courseDto;
+
+    private async Task CallAPIAsync()
+    {
+        demo = (await _apiService.GetAsync<IEnumerable<UserDto>>("api/course"))?.ToList() ?? [];
+    }
+
+    // private async Task CreateCourseAsync()
+    // {
+    //     var dto = new CourseDto { Name = "Created at blazor" };
+    //     courseDto = (await _apiService.PostAsync<CourseDto, CourseDto>("api/course", dto));
+    // }
+
+
+}

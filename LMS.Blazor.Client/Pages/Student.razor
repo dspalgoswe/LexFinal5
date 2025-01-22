@@ -181,7 +181,6 @@ else
                 participants = await Http.GetFromJsonAsync<List<UserDto>>($"api/course/{course.CourseId}/participants");
             }
         }
-
         catch (Exception ex)
         {
             errorMessage = "An error occurred while loading the course data.";

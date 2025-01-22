@@ -23,11 +23,10 @@ namespace LMS.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllStudentsAsync()
+        public async Task<List<UserDto>> GetAllStudentsAsync()
         {
-            //var students = await _unitOfWork.Course.GetAllWithDetailsAsync();
             var students = await _uow.Student.GetAllStudentsAsync();
-            return _mapper.Map<IEnumerable<UserDto>>(students);
+            return _mapper.Map<List<UserDto>>(students);
         }
 
 
@@ -90,6 +89,24 @@ namespace LMS.Services
 
             var result = await _uow.SaveChangesAsync();
             return result > 0;
+
+        }
+
+        public async Task<bool> DeleteStudentAsync(int studentId)
+        {
+            //Hämtar studenten från databasen via UnitOfWork
+            var currentStudent = await _uow.Student.GetStudentByIdAsync(studentId);
+
+            if (currentStudent == null)
+            {
+                return false; //Studenten finns inte
+            }
+
+            _uow.Student.Delete(currentStudent);
+
+            var result = await _uow.SaveChangesAsync();
+            return result > 0;
+
 
         }
     }

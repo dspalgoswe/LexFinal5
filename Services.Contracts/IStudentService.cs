@@ -9,7 +9,10 @@ namespace Services.Contracts
 {
     public interface IStudentService
     {
-        //Hämtar studenten
+        //Hämtar Alla studenter
+        Task<List<UserDto>> GetAllStudentsAsync();
+
+        //Hämtar en specifik student med Id
         Task<UserDto> GetStudentByIdAsync(int studentId);
 
         //Hämtar studentens nuvarande kurs
@@ -29,6 +32,6 @@ namespace Services.Contracts
 
         //Uppdaterar studentens profilinformation
         Task<bool> UpdateStudentProfileAsync(int studentId, UpdateUserDto studentDto);
-
+        Task<bool> DeleteStudentAsync(int studentId);
     }
 }
