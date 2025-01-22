@@ -1,104 +1,250 @@
-﻿@page "/student-course"
+﻿@page "/students"
+@using LMS.Blazor.Client.Services
+@using LMS.Shared.DTOs
 @inject HttpClient Http
+@inject IApiService ApiService
 
+<h4>Student Information</h4>
 
-    @if (isLoading)
-    {
-        <p> Loading...</p>
-    }
-
-    else if (course == null)
-    {
-    <p>No course found for the student. </p>
+<!-- Lista alla studenter -->
+<h2>All Students</h2>
+@if (students == null)
+{
+    <p>Loading students...</p>
+}
+else if (students.Count == 0)
+{
+    <p>No students found.</p>
+}
+else
+{
+    <ul>
+        @foreach (var student in students)
+        {
+            <li>
+                <b>@student.FirstName @student.LastName</b> - <a @onclick="(() => LoadStudentDetails(student.Id))">Details</a>
+            </li>
+            <li>
+                <b>@student.Email</b> - <a @onclick="(() => LoadStudentDetails(student.Id))">Details</a>
+            </li>
+        }
+    </ul>
 }
 
+<!-- Studentdetaljer -->
+<h2>Student Details</h2>
+@if (selectedStudent == null)
+{
+    <p>Select a student to see details.</p>
+}
+else
+{
+    <p><b>Name:</b> @selectedStudent.FirstName @selectedStudent.LastName</p>
+    <p><b>Email:</b> @selectedStudent.Email</p>
+    <p><b>Course:</b> @course?.Name</p>
+
+    <h3>Modules in Course</h3>
+    @if (module == null)
+    {
+        <p>Loading modules...</p>
+    }
+    @* else if (module.Count == 0)
+    {
+        <p>No modules found for this course.</p>
+    } *@
     else
     {
-      <h3>Course: @course.Name</h3>
-      <p>@course.Description</p>
+        <h3>Course: @course?.Name</h3>
+        <p>@course?.Description</p>
+
+        <h4>Modules:</h4>
+        @if (course?.Modules != null && course.Modules.Any())
+        {
+            <ul>
+                @foreach (var module in course.Modules)
+                {
+                    <li>
+                        <strong>@module.Name</strong>: @module.Description
+                        (Start: @module.StartDate, End: @module.EndDate)
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>There are no modules available for this course.</p>
+        }
     }
 
-
     <h4>Participants:</h4>
-      <ul>
-           @if(participants != null && participants.Any())
+    <ul>
+        @if (participants != null && participants.Any())
+        {
+            @foreach (var p in participants)
             {
-               @foreach (var p in participants)
-                {
-                <li> @p.UserName (@p.Email)</li>
-                }
-
+                <li>@p.FirstName (@p.LastName)</li>
             }
+        }
+        else
+        {
+            <li>No participants found.</li>
+        }
+    </ul>
 
-            else
+    <h4>Activities:</h4>
+    <ul>
+        @if (activities != null && activities.Any())
+        {
+            @foreach (var activity in activities)
             {
-                <li>No participants found.</li>
+                <li>
+                    <strong>@activity.Name</strong>: @activity.Description <br />
+                    <em>@activity.StartDate.ToShortDateString()</em> -
+                    <em>@activity.EndDate.ToShortDateString()</em>
+                    <h3>Module Id:</h3> @activity.ModuleId
+                </li>
             }
-      </ul>
+        }
+        else
+        {
+            <li>There is no activity found for this module.</li>
+        }
+    </ul>
+}
+
 
 
 @code {
-
-    private string studentId = "student-id"; //ska ersätas med student-Id
-    private Course? course;
-    private List<Participant>? participants;
+    private List<UserDto>? students;
+    private UserDto selectedStudent;
+    private CourseDto? course;
+    private ModuleDto? module;
+    private List<UserDto> participants;
+    private List<ActivityDto> activities;
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadStudentCourse();
+        await LoadAllStudents();
+
     }
 
-
-
-    private async Task LoadStudentCourse()
+    private async Task LoadAllStudents()
     {
-        isLoading = true;
-
         try
         {
+            //Hämtar studenter
+             students = await Http.GetFromJsonAsync<List<UserDto>>("api/students");
+
             //Hämtar kursen
-            course = await Http.GetFromJsonAsync<Course>($"api/student/{studentId}/course");
+            course = await Http.GetFromJsonAsync<CourseDto>($"api/student/course");
 
             //Hämtar deltagarna
             if(course != null)
             {
-                participants = await Http.GetFromJsonAsync<List<Participant>>($"api/course/{course.Id}/participants");
+                participants = await Http.GetFromJsonAsync<List<UserDto>>($"api/course/{course.CourseId}/participants");
+            }
+
+            
+
+        }
+        catch (Exception ex)
+        {
+
+            errorMessage = "An error occurred while loading the course data.";
+            Console.Error.WriteLine($"Error: {ex.Message}");
+
+            Console.Error.WriteLine($"Error loading students: {ex.Message}");
+
+        }
+
+        finally
+        {
+            isLoading = false;
+            StateHasChanged(); //Uppdaterar komponentens tillstånd
+        }
+    }
+
+
+   
+
+    private async Task LoadStudentCourse()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            course = await Http.GetFromJsonAsync<CourseDto>($"api/student/course");
+            if (course != null)
+            {
+                participants = await Http.GetFromJsonAsync<List<UserDto>>($"api/course/{course.CourseId}/participants");
             }
         }
 
         catch (Exception ex)
         {
+            errorMessage = "An error occurred while loading the course data.";
             Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
         }
     }
 
-      //Klassen för att representera kursens data
-        public class Course
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public string Description { get; set; }
-            public List<Module> Modules { get; set; } = new();
 
+    private async Task LoadModuleData()
+    {
+        isLoading = true;
+
+        try
+        {
+            //Hämtar modulerna
+            module = await Http.GetFromJsonAsync<ModuleDto>($"api/module/{module.Name}");
+
+            //Hämtar aktivities för modulen
+            if (module != null) 
+            {
+                activities = await Http.GetFromJsonAsync<List<ActivityDto>>($"api/module/{module.Name}/activities");
+            }
         }
 
-        public class Module
+        catch(Exception ex)
         {
-            public string Name { get; set; }
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
+            Console.Error.WriteLine($"Error loading module or activities: {ex.Message}");
         }
+    }
 
-        public class Participant
+
+
+    private async Task LoadStudentDetails(int studentId)
+    {
+        try
         {
-            public string Id { get; set; }
-            public string UserName { get; set; }
-            public string Email { get; set; }
-        
+            //Hämtar studentens detaljer
+            selectedStudent = await Http.GetFromJsonAsync<UserDto>($"api/students/{studentId}");
+
+            //Hämtar kursen för studenten
+            course = await Http.GetFromJsonAsync<CourseDto>($"api/students/{studentId}/Course");
+
+            //Hämtar moduler för studentens kurs
+            if (course != null)
+            {
+                module = await Http.GetFromJsonAsync<ModuleDto>($"api/Student/Modules/{course.Name}");
+            }
         }
-
-
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading student details: {ex.Message}");
+        }
+    }
 
 
 }
+
+   
+   
+
+
